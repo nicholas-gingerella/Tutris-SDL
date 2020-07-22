@@ -1,18 +1,26 @@
 CXX = g++
-CXXFLAGS = -Wall -c -std=c++11 $(SDL_INCLUDE)
+CXXFLAGS = -Wall -std=c++11 -I$(SDL_INCLUDE) -I$(INCLUDE_DIR)
 SDL_LIB = -L/usr/lib -lSDL2 -lSDL2_image -Wl,-rpath=/usr/lib
-SDL_INCLUDE = -I/usr/SDL_INCLUDE -I../include
-BIN_DIR = ../bin
 LDFLAGS = $(SDL_LIB)
+SDL_INCLUDE = /usr/SDL_INCLUDE
+INCLUDE_DIR = ../include
+OBJ_DIR = obj
+BIN_DIR = ../bin
 EXE = Tutris
 
-all: $(EXE)
+_INCLUDES = field.h tetromino.h
+INCLUDES = $(patsubst %,$(INCLUDE_DIR)/%,$(_INCLUDES))
 
-$(EXE): main.o
-	$(CXX) $< $(LDFLAGS) -o $(BIN_DIR)/$@
+_OBJS = main.o field.o tetromino.o 
+OBJS = $(patsubst %,$(OBJ_DIR)/%,$(_OBJS))
 
-main.o: main.cpp
-	$(CXX) $(CXXFLAGS) $< -o $@
+$(OBJ_DIR)/%.o: %.cpp $(INCLUDES)
+	$(CXX) -c -o $@ $< $(CXXFLAGS)
+
+$(EXE): $(OBJS)
+	$(CXX) -o $(BIN_DIR)/$@ $^ $(CXXFLAGS) $(LDFLAGS)
+
+.PHONY: clean
 
 clean:
-	rm *.o && rm $(BIN_DIR)/$(EXE)
+	rm $(OBJ_DIR)/*.o && rm $(BIN_DIR)/$(EXE)

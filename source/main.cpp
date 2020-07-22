@@ -10,6 +10,8 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include "SDL_Utils.h"
+#include "field.h"
+#include "tetromino.h"
 
 const int clipWidth = 100;
 const int clipHeight = 100;
@@ -64,6 +66,8 @@ int main(int argc, char **argv)
 
 
     // PROGRAM LOGIC STARTS HERE
+    Field myField;
+    Tetromino myPiece;
 
     SDL_Event event;
     bool game_running = true;

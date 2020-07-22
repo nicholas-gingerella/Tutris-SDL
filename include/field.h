@@ -2,14 +2,14 @@
 #define FIELD_H
 class Field
 {
-    public:
+public:
+    Field();
+    ~Field();
     void render();
 
-    private:
-    int x, y;
-    int w, h;
-    // grid 16 x 32
-    int grid[16 * 32] = {0};
-    // bg color
+private:
+    int pos_x, pos_y;
+    int num_rows, num_cols;
+    int grid;
 };
 #endif
