@@ -9,12 +9,12 @@
 #include <string>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
-#include "SDL_Utils.h"
-#include "field.h"
-#include "tetromino.h"
+#include "my_utils/SDL_Utils.h"
+#include "tutris/field.h"
+#include "tutris/tetromino.h"
 
-const int clipWidth = 100;
-const int clipHeight = 100;
+const int FIELD_WIDTH = 16;
+const int FIELD_HEIGHT = 32;
 const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
 const int TILE_SIZE = 40;
@@ -27,6 +27,11 @@ SDL_Renderer *renderer = nullptr;
 
 int main(int argc, char **argv)
 {
+    Field myField(0,0,FIELD_WIDTH, FIELD_HEIGHT);
+    Tetromino myPiece;
+
+    myField.printField();
+
     ///////////////////////////////
     // START SDL Setup Boilerplate
     ///////////////////////////////
@@ -66,8 +71,6 @@ int main(int argc, char **argv)
 
 
     // PROGRAM LOGIC STARTS HERE
-    Field myField;
-    Tetromino myPiece;
 
     SDL_Event event;
     bool game_running = true;

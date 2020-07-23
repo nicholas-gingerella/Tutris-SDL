@@ -1,6 +1,8 @@
-#include "tetromino.h"
+#include "tutris/tetromino.h"
 
-Tetromino::Tetromino()
+Tetromino::Tetromino() :
+pos_x(0),
+pos_y(0)
 {
 
 }
