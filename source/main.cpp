@@ -12,9 +12,8 @@
 #include "my_utils/SDL_Utils.h"
 #include "tutris/field.h"
 #include "tutris/tetromino.h"
+#include "tutris/tutris.h"
 
-const int FIELD_WIDTH = 16;
-const int FIELD_HEIGHT = 32;
 const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
 const int TILE_SIZE = 40;
@@ -27,10 +26,25 @@ SDL_Renderer *renderer = nullptr;
 
 int main(int argc, char **argv)
 {
-    Field myField(0,0,FIELD_WIDTH, FIELD_HEIGHT);
-    Tetromino myPiece;
+    Field myField(0, 0, tutris::FIELD_WIDTH, tutris::FIELD_HEIGHT);
+    Tetromino piece1(tutris::tetromino_shape::el);
+    Tetromino piece2(tutris::tetromino_shape::line);
+    Tetromino piece3(tutris::tetromino_shape::square);
+    Tetromino piece4(tutris::tetromino_shape::tee);
 
     myField.printField();
+    std::cout << std::endl;
+    std::cout << std::endl;
+    piece1.printPiece();
+    std::cout << std::endl;
+    std::cout << std::endl;
+    piece2.printPiece();
+    std::cout << std::endl;
+    std::cout << std::endl;
+    piece3.printPiece();
+    std::cout << std::endl;
+    std::cout << std::endl;
+    piece4.printPiece();
 
     ///////////////////////////////
     // START SDL Setup Boilerplate
@@ -109,10 +123,10 @@ int main(int argc, char **argv)
         // Game logic
 
         // Render
-        
         // Clear screen to white before drawing scene
         SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
         SDL_RenderClear(renderer);
+        myField.render(renderer);
         SDL_RenderPresent(renderer);
     }
 

@@ -11,7 +11,7 @@ BIN_DIR = ../bin
 EXE = Tutris
 
 # Tutris Includes
-_TUTRIS_INCLUDES = field.h tetromino.h
+_TUTRIS_INCLUDES = field.h tetromino.h tutris.h
 TUTRIS_INCLUDES = $(patsubst %,$(TUTRIS_INCLUDES_DIR)/%,$(_TUTRIS_INCLUDES))
 
 _UTIL_INCLUDES = SDL_Utils.h
