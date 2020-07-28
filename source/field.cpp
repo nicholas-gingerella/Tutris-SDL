@@ -1,6 +1,7 @@
 #include <iostream>
 #include <SDL2/SDL.h>
 #include "tutris/field.h"
+#include "tutris/tetromino.h"
 #include "tutris/tutris.h"
 
 Field::Field() :
@@ -25,10 +26,6 @@ num_cols(cols)
     for (int i = 0; i < num_grid_elems; ++i)
     {
         grid[i] = 0;
-        if (i % 2 == 0)
-        {
-            grid[i] = 1; // test
-        }
     }
 
 }
@@ -43,7 +40,6 @@ Field::~Field()
 
 void Field::render(SDL_Renderer *renderer)
 {
-    
     int draw_pos_x = pos_x;
     int draw_pos_y = pos_y;
     int counter = 1;
@@ -62,9 +58,15 @@ void Field::render(SDL_Renderer *renderer)
             //draw square
             SDL_SetRenderDrawColor( renderer, 0xFF,0x00,0x00,0xFF);
             SDL_RenderFillRect(renderer, &field_square);
+            SDL_SetRenderDrawColor( renderer, 0x00,0x00,0x00,0xFF);
+            SDL_RenderDrawRect(renderer, &field_square);
+
         }
-        SDL_SetRenderDrawColor( renderer, 0x00,0x00,0x00,0xFF);
-        SDL_RenderDrawRect(renderer, &field_square);
+        else
+        {
+            SDL_SetRenderDrawColor( renderer, 0xCC,0xCC,0xCC,0xFF);
+            SDL_RenderDrawRect(renderer, &field_square);
+        }
         
         if ( counter % num_cols == 0 )
         {
@@ -99,4 +101,34 @@ void Field::printField()
     }
 
     std::cout << std::endl;
+}
+
+void Field::addPiece(tutris::tetromino_shape shape)
+{
+    // choose a random piece
+    Tetromino piece(shape);
+
+    // place piece at top of grid
+    std::vector<int> newPiece = piece.getPiece();
+
+    // decide grid position (index) to start drawing piece
+    // from top left to bottom right.
+    int x_pos = 3; // top of screen just off the corner
+    int y_pos = 0;
+    grid[x_pos + (y_pos * num_cols)] = newPiece[0];
+    grid[(x_pos+1) + (y_pos * num_cols)] = newPiece[1];
+    grid[(x_pos) + ((y_pos+1) * num_cols)] = newPiece[2];
+    grid[(x_pos+1) + ((y_pos+1) * num_cols)] = newPiece[3];
+    grid[(x_pos) + ((y_pos+2) * num_cols)] = newPiece[4];
+    grid[(x_pos+1) + ((y_pos+2) * num_cols)] = newPiece[5];
+    grid[(x_pos) + ((y_pos+3) * num_cols)] = newPiece[6];
+    grid[(x_pos+1) + ((y_pos+3) * num_cols)] = newPiece[7];
+
+    // change grid entry to '1' for solid blocks
+
+}
+
+void Field::movePiece()
+{
+
 }

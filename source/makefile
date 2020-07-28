@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -Wall -std=c++11 -I$(SDL_INCLUDE) -I$(INCLUDE_DIR)
+CXXFLAGS = -ggdb -Wall -std=c++11 -I$(SDL_INCLUDE) -I$(INCLUDE_DIR)
 SDL_LIB = -L/usr/lib -lSDL2 -lSDL2_image -Wl,-rpath=/usr/lib
 LDFLAGS = $(SDL_LIB)
 SDL_INCLUDE = /usr/SDL_INCLUDE

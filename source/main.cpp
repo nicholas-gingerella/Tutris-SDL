@@ -26,7 +26,7 @@ SDL_Renderer *renderer = nullptr;
 
 int main(int argc, char **argv)
 {
-    Field myField(0, 0, tutris::FIELD_WIDTH, tutris::FIELD_HEIGHT);
+    Field myField(100, 100, tutris::FIELD_WIDTH, tutris::FIELD_HEIGHT);
     Tetromino piece1(tutris::tetromino_shape::el);
     Tetromino piece2(tutris::tetromino_shape::line);
     Tetromino piece3(tutris::tetromino_shape::square);
@@ -121,6 +121,7 @@ int main(int argc, char **argv)
         }
 
         // Game logic
+        myField.addPiece(tutris::tetromino_shape::line);
 
         // Render
         // Clear screen to white before drawing scene

@@ -1,6 +1,6 @@
 #ifndef FIELD_H
 #define FIELD_H
-
+#include "tutris/tutris.h"
 class Field
 {
 public:
@@ -10,6 +10,8 @@ public:
     void render(SDL_Renderer *renderer);
     bool isFilled();
     void printField();
+    void addPiece(tutris::tetromino_shape piece);
+    void movePiece();
 
 private:
     int pos_x, pos_y;

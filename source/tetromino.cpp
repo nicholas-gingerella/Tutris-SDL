@@ -23,7 +23,8 @@ Tetromino::Tetromino(tutris::tetromino_shape s)
                 0,1,
                 1,1
             };
-            std::copy(std::begin(shape_el), std::end(shape_el), std::begin(shape));
+            shape.clear();
+            shape.insert(shape.end(), &shape_el[0], &shape_el[8]);
             break;
         }
         case tutris::tetromino_shape::line:
@@ -34,8 +35,8 @@ Tetromino::Tetromino(tutris::tetromino_shape s)
                 0,1,
                 0,1
             };
-            std::copy(std::begin(shape_line), std::end(shape_line), std::begin(shape));
-            break; 
+            shape.clear();
+            shape.insert(shape.end(), &shape_line[0], &shape_line[8]);            break; 
         }
         case tutris::tetromino_shape::square:
         {
@@ -45,8 +46,8 @@ Tetromino::Tetromino(tutris::tetromino_shape s)
                 0,0,
                 0,0
             };
-            std::copy(std::begin(shape_square), std::end(shape_square), std::begin(shape));
-            break;
+            shape.clear();
+            shape.insert(shape.end(), &shape_square[0], &shape_square[8]);            break;
         }
         case tutris::tetromino_shape::tee:
         {
@@ -56,8 +57,8 @@ Tetromino::Tetromino(tutris::tetromino_shape s)
                 0,1,
                 0,0
             };
-            std::copy(std::begin(shape_tee), std::end(shape_tee), std::begin(shape));
-            break;
+            shape.clear();
+            shape.insert(shape.end(), &shape_tee[0], &shape_tee[8]);            break;
         }
         case tutris::tetromino_shape::random:
         {
@@ -99,4 +100,9 @@ void Tetromino::printPiece()
         std::cout << shape[i];
 
     }
+}
+
+std::vector<int> Tetromino::getPiece()
+{
+    return shape;
 }

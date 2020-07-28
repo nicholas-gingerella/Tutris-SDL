@@ -1,5 +1,6 @@
 #ifndef TETROMINO_H
 #define TETROMINO_H
+#include <vector>
 #include "tutris/tutris.h"
 #include <SDL2/SDL.h>
 
@@ -14,10 +15,11 @@ public:
   void rotate();
   void render(SDL_Renderer *renderer);
   void printPiece();
+  std::vector<int> getPiece();
 
 private:
   int pos_x, pos_y;
-  int shape[8] = {0};
+  std::vector<int> shape;
   
 };
 
