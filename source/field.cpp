@@ -107,25 +107,24 @@ void Field::addPiece(tutris::tetromino_shape shape)
 {
     // choose a random piece
     Tetromino piece(shape);
-
-    // place piece at top of grid
     std::vector<int> newPiece = piece.getPiece();
 
-    // decide grid position (index) to start drawing piece
-    // from top left to bottom right.
-    int x_pos = 3; // top of screen just off the corner
+    // place piece at top of grid
+    int x_pos = (num_cols/2) - 1;
     int y_pos = 0;
-    grid[x_pos + (y_pos * num_cols)] = newPiece[0];
-    grid[(x_pos+1) + (y_pos * num_cols)] = newPiece[1];
-    grid[(x_pos) + ((y_pos+1) * num_cols)] = newPiece[2];
-    grid[(x_pos+1) + ((y_pos+1) * num_cols)] = newPiece[3];
-    grid[(x_pos) + ((y_pos+2) * num_cols)] = newPiece[4];
-    grid[(x_pos+1) + ((y_pos+2) * num_cols)] = newPiece[5];
-    grid[(x_pos) + ((y_pos+3) * num_cols)] = newPiece[6];
-    grid[(x_pos+1) + ((y_pos+3) * num_cols)] = newPiece[7];
-
-    // change grid entry to '1' for solid blocks
-
+    int local_cols = 2;
+    for (int i = 0; i < 8; ++i)
+    {
+        // Calculate grid position (index) to start drawing piece
+        // from top left to bottom right.
+        // change grid entry to '1' for solid blocks
+        // Draw order for default piece orientation:
+        //   1 2
+        //   3 4
+        //   5 6
+        //   7 8
+        grid[(x_pos + (i%local_cols)) + ((y_pos + (i/local_cols)) * num_cols)] = newPiece[i];
+    }
 }
 
 void Field::movePiece()

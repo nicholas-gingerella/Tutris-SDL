@@ -121,7 +121,7 @@ int main(int argc, char **argv)
         }
 
         // Game logic
-        myField.addPiece(tutris::tetromino_shape::line);
+        myField.addPiece(tutris::tetromino_shape::square);
 
         // Render
         // Clear screen to white before drawing scene
