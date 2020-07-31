@@ -26,26 +26,6 @@ SDL_Renderer *renderer = nullptr;
 
 int main(int argc, char **argv)
 {
-    Field myField(100, 100, tutris::FIELD_WIDTH, tutris::FIELD_HEIGHT);
-    Tetromino piece1(tutris::tetromino_shape::el);
-    Tetromino piece2(tutris::tetromino_shape::line);
-    Tetromino piece3(tutris::tetromino_shape::square);
-    Tetromino piece4(tutris::tetromino_shape::tee);
-
-    myField.printField();
-    std::cout << std::endl;
-    std::cout << std::endl;
-    piece1.printPiece();
-    std::cout << std::endl;
-    std::cout << std::endl;
-    piece2.printPiece();
-    std::cout << std::endl;
-    std::cout << std::endl;
-    piece3.printPiece();
-    std::cout << std::endl;
-    std::cout << std::endl;
-    piece4.printPiece();
-
     ///////////////////////////////
     // START SDL Setup Boilerplate
     ///////////////////////////////
@@ -85,7 +65,7 @@ int main(int argc, char **argv)
 
 
     // PROGRAM LOGIC STARTS HERE
-
+    Field game_field(100, 100, tutris::FIELD_WIDTH, tutris::FIELD_HEIGHT);
     SDL_Event event;
     bool game_running = true;
 
@@ -108,11 +88,14 @@ int main(int argc, char **argv)
                 {
                     case SDLK_1:
                         break;
-                    case SDLK_2:
+                    case SDLK_LEFT:
+                        game_field.movePiece(tutris::move_direction::left);
                         break;
-                    case SDLK_3:
+                    case SDLK_RIGHT:
+                        game_field.movePiece(tutris::move_direction::right);
                         break;
-                    case SDLK_4:
+                    case SDLK_DOWN:
+                        game_field.movePiece(tutris::move_direction::down);
                         break;
                     default:
                         break;
@@ -121,13 +104,16 @@ int main(int argc, char **argv)
         }
 
         // Game logic
-        myField.addPiece(tutris::tetromino_shape::square);
+        if (!game_field.isPieceActive())
+        {
+            game_field.addPiece(tutris::tetromino_shape::el);
+        }
 
         // Render
         // Clear screen to white before drawing scene
         SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
         SDL_RenderClear(renderer);
-        myField.render(renderer);
+        game_field.render(renderer);
         SDL_RenderPresent(renderer);
     }
 
