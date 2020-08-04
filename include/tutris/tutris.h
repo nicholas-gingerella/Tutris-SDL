@@ -15,6 +15,20 @@ namespace tutris
         el,
         random
     };
+
+    enum move_direction
+    {
+        left = 0,
+        right,
+        down,
+    };
+
+    enum grid_cell_type
+    {
+        empty = 0,
+        piece,
+        wall
+    };
 }
 
 #endif
