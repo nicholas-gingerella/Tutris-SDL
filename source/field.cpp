@@ -197,11 +197,12 @@ void Field::movePiece(tutris::move_direction dir)
             // Can we move to the left?
             bool can_move = true;
             int new_x_pos = m_piece_pos_x - 1;
-            for (int i = 0; i < 4; ++i)
+            for (int i = 0; i < 8; ++i)
             {
                 // Index for x/y-coordinate in grid: x-pos + y-pos*num_grid_cols
+                // only do collision checks on solid parts of the piece shape
                 int grid_index = (new_x_pos) + ((m_piece_pos_y + i) * m_num_cols);
-                if (m_grid[grid_index] != 0)
+                if ((i/local_cols == 0) && (m_piece_shape[i] == 1) && m_grid[grid_index] != 0)
                 {
                     can_move = false;
                     break;
@@ -214,7 +215,10 @@ void Field::movePiece(tutris::move_direction dir)
                 {
                     // Index for x/y-coordinate in grid: x-pos + y-pos*num_grid_cols
                     int grid_index = (m_piece_pos_x + (i%local_cols)) + ((m_piece_pos_y + (i/local_cols)) * m_num_cols);
-                    m_grid[grid_index] = 0;
+                    if (m_piece_shape[i] == 1)
+                    {
+                        m_grid[grid_index] = 0;
+                    }
                 }
 
                 m_piece_pos_x = new_x_pos;
@@ -222,7 +226,10 @@ void Field::movePiece(tutris::move_direction dir)
                 for (int i = 0; i < 8; ++i)
                 {
                     // Index for x/y-coordinate in grid: x-pos + y-pos*num_grid_cols
-                    m_grid[(m_piece_pos_x + (i%local_cols)) + ((m_piece_pos_y + (i/local_cols)) * m_num_cols)] = m_piece_shape[i];
+                    if (m_piece_shape[i] == 1)
+                    {
+                        m_grid[(m_piece_pos_x + (i%local_cols)) + ((m_piece_pos_y + (i/local_cols)) * m_num_cols)] = m_piece_shape[i];
+                    }
                 }
             }
             
@@ -233,38 +240,43 @@ void Field::movePiece(tutris::move_direction dir)
             int local_cols = 2;
 
             // // Can we move to the right?
-            // bool can_move = true;
+             bool can_move = true;
              int new_x_pos = m_piece_pos_x + 1;
-            // for (int i = 0; i < 8; ++i)
-            // {
-            //     // Index for x/y-coordinate in grid: x-pos + y-pos*num_grid_cols
-            //     int grid_index = (new_x_pos) + ((m_piece_pos_y + i) * m_num_cols);
-            //     if (i%local_cols != 0)
-            //     {
-            //         grid_index = (new_x_pos) + ((m_piece_pos_y + i) * m_num_cols);
-            //     }
 
-            //     if (m_grid[grid_index] != 0)
-            //     {
-            //         can_move = false;
-            //         break;
-            //     }
-            // }
-
-            if (true)
+            // check collision with piece shape
+            for (int i = 0; i < 8; i++)
+            {
+                // only check the rightmost cells of the piece for collision
+                int grid_index = (new_x_pos + (i%local_cols)) + ((m_piece_pos_y + (i/local_cols)) * m_num_cols);
+                if (m_piece_shape[i] == 1 && i%local_cols != 0 && m_grid[grid_index] != 0)
+                {
+                    can_move = false;
+                    break;
+                }
+            }
+        
+            if (can_move)
             {
                 for (int i = 0; i < 8; ++i)
                 {
                     // Index for x/y-coordinate in grid: x-pos + y-pos*num_grid_cols
-                    m_grid[(m_piece_pos_x + (i%local_cols)) + ((m_piece_pos_y + (i/local_cols)) * m_num_cols)] = 0;
+                    // only clear grid index if a solid part of the piece is currently occupying it
+                    int grid_index = (m_piece_pos_x + (i%local_cols)) + ((m_piece_pos_y + (i/local_cols)) * m_num_cols);
+                    if (m_piece_shape[i] == 1)
+                    {
+                      m_grid[grid_index] = 0;
+                    }
                 }
                                 
                 m_piece_pos_x = new_x_pos;
-
                 for (int i = 0; i < 8; ++i)
                 {
                     // Index for x/y-coordinate in grid: x-pos + y-pos*num_grid_cols
-                    m_grid[(m_piece_pos_x + (i%local_cols)) + ((m_piece_pos_y + (i/local_cols)) * m_num_cols)] = m_piece_shape[i];
+                    int grid_index = (m_piece_pos_x + (i%local_cols)) + ((m_piece_pos_y + (i/local_cols)) * m_num_cols);
+                    if (m_piece_shape[i] == 1)
+                    {
+                        m_grid[grid_index] = m_piece_shape[i];
+                    }
                 }
             }
 
