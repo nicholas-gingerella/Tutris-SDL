@@ -14,6 +14,8 @@ public:
     void addPiece(tutris::tetromino_shape piece);
     void movePiece(tutris::move_direction dir);
     bool isPieceActive();
+    bool moveBlock(int start_pos_x, int start_pos_y, int end_pos_x, int end_pos_y);
+
 
 private:
     int m_pos_x;

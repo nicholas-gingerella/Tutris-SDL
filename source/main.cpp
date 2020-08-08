@@ -106,7 +106,7 @@ int main(int argc, char **argv)
         // Game logic
         if (!game_field.isPieceActive())
         {
-            game_field.addPiece(tutris::tetromino_shape::square);
+            game_field.addPiece(tutris::tetromino_shape::line);
         }
 
         // Render
