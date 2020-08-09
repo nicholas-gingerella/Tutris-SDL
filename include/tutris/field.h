@@ -13,6 +13,7 @@ public:
     void printField();
     void addPiece(tutris::tetromino_shape piece);
     void movePiece(tutris::move_direction dir);
+    void rotatePiece();
     bool isPieceActive();
     bool moveBlock(int start_pos_x, int start_pos_y, int end_pos_x, int end_pos_y);
 
@@ -25,6 +26,7 @@ private:
     int m_piece_pos_x;
     int m_piece_pos_y;
     bool m_piece_active;
+    int m_current_piece_rotation;
     std::vector<int> m_piece_shape;
     int *m_grid;
 };

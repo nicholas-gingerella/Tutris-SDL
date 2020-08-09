@@ -170,6 +170,7 @@ void Field::addPiece(tutris::tetromino_shape shape)
     Tetromino piece(shape);
     m_piece_shape.clear();
     m_piece_shape = piece.getPiece();
+    m_current_piece_rotation = 0; // default to upright orientation
 
     // place piece at top of grid
     m_piece_pos_x = (m_num_cols/2) - 1;
@@ -392,6 +393,66 @@ void Field::movePiece(tutris::move_direction dir)
         }
     }
 }
+
+void Field::rotatePiece()
+{
+    std::cout << "Rotating piece from " << m_current_piece_rotation << std::endl;
+    // rotation 0 = upright
+    // rotation 1 = left 90
+    // rotation 2 = 180
+    // rotation 3 = left 270 (or right -90)
+    if (m_current_piece_rotation == 0)
+    {
+        // Check if rotation is possible (can't collide with anything)
+        // if can rotate
+        //   calculate new grid indexes for rotated piece
+        //   clear current occupied grid indexes
+        //   set new grid index positions for each part of piece
+        //   set new rotation
+        m_current_piece_rotation = 1;
+        std::cout << "new piece rotation is " << m_current_piece_rotation << std::endl;
+    }
+    else if (m_current_piece_rotation == 1)
+    {
+        // Check if rotation is possible (can't collide with anything)
+        // if can rotate
+        //   calculate new grid indexes for rotated piece
+        //   clear current occupied grid indexes
+        //   set new grid index positions for each part of piece
+        //   set new rotation
+        m_current_piece_rotation = 2;
+        std::cout << "new piece rotation is " << m_current_piece_rotation << std::endl;
+    }
+    else if (m_current_piece_rotation == 2)
+    {
+        // Check if rotation is possible (can't collide with anything)
+        // if can rotate
+        //   calculate new grid indexes for rotated piece
+        //   clear current occupied grid indexes
+        //   set new grid index positions for each part of piece
+        //   set new rotation
+        m_current_piece_rotation = 3;
+        std::cout << "new piece rotation is " << m_current_piece_rotation << std::endl;
+    }
+    else if (m_current_piece_rotation == 3)
+    {
+        // Check if rotation is possible (can't collide with anything)
+        // if can rotate
+        //   calculate new grid indexes for rotated piece
+        //   clear current occupied grid indexes
+        //   set new grid index positions for each part of piece
+        //   set new rotation
+        m_current_piece_rotation = 0;
+        std::cout << "new piece rotation is " << m_current_piece_rotation << std::endl;
+    }
+    else
+    {
+        // invalid rotation, how did we get here?
+        std::cout << "Invalid rotation????" << std::endl;
+    }
+    
+}
+
 
 bool Field::isPieceActive()
 {

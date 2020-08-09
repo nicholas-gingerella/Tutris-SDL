@@ -97,6 +97,9 @@ int main(int argc, char **argv)
                     case SDLK_DOWN:
                         game_field.movePiece(tutris::move_direction::down);
                         break;
+                    case SDLK_z:
+                        game_field.rotatePiece();
+                        break;
                     default:
                         break;
                 }
@@ -106,7 +109,7 @@ int main(int argc, char **argv)
         // Game logic
         if (!game_field.isPieceActive())
         {
-            game_field.addPiece(tutris::tetromino_shape::line);
+            game_field.addPiece(tutris::tetromino_shape::el);
         }
 
         // Render
