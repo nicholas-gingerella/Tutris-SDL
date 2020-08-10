@@ -321,8 +321,6 @@ void Field::movePiece(tutris::move_direction dir)
              int new_y_pos = m_piece_pos_y + 1;
 
             // check collision with piece shape
-
-            // check collision with piece shape
             for (int i = 0; i < tutris::PIECE_DIMENSION; i++)
             {
                 // Index for x/y-coordinate in grid: x-pos + y-pos*num_grid_cols
@@ -330,7 +328,6 @@ void Field::movePiece(tutris::move_direction dir)
                 int curr_piece_index = i;
                 int grid_piece_x = m_piece_pos_x + (curr_piece_index % local_cols);
                 int grid_piece_y = m_piece_pos_y + (curr_piece_index/local_cols);
-                //int current_grid_index = grid_piece_x + (grid_piece_y * m_num_cols);
                 int target_grid_index = (grid_piece_x) + ((grid_piece_y + 1) * m_num_cols);
 
                 if (m_piece_shape[curr_piece_index] == tutris::grid_cell_type::curr_piece)     
@@ -342,25 +339,6 @@ void Field::movePiece(tutris::move_direction dir)
                     }
                 }
             }
-
-
-            // for (int i = 7; i >= 0 ; i--)
-            // {
-            //     // only check the bottom cells of the piece for collision
-            //     int grid_index = (m_piece_pos_x + (i%local_cols)) + ((new_y_pos + (i/local_cols)) * m_num_cols);
-            //     if (m_piece_shape[i] == 1)
-            //     {
-            //         if (m_grid[grid_index] != 0)
-            //         {
-            //             can_move = false;
-            //             break;
-            //         }
-
-            //         // we're going in reverse, we hit the bottom row
-            //         // just do this for now to get some traction
-            //         break; 
-            //     }
-            // }
   
             if (can_move)
             {
@@ -397,6 +375,7 @@ void Field::movePiece(tutris::move_direction dir)
 void Field::rotatePiece()
 {
     std::cout << "Rotating piece from " << m_current_piece_rotation << std::endl;
+    int piece_cols = 4;
     // rotation 0 = upright
     // rotation 1 = left 90
     // rotation 2 = 180
@@ -404,6 +383,30 @@ void Field::rotatePiece()
     if (m_current_piece_rotation == 0)
     {
         // Check if rotation is possible (can't collide with anything)
+        // for each cell in in active piece
+        //  calculate new index for piece cell
+        //  if new index on grid is occupied by a wall or set piece
+        //    can't rotate piece, return
+        int rotated_piece [tutris::PIECE_DIMENSION];
+        for (int i = 0; i < tutris::PIECE_DIMENSION; i++)
+        {
+            // only do collision checks on solid parts of the piece shape
+            int x = i%piece_cols;
+            int y = i/piece_cols;
+            int target_index = 12-4*x+y;
+            rotated_piece[target_index] = m_piece_shape[i];
+        }
+
+        //DEBUG: Print out rotated piece
+        for (int i = 0; i < tutris::PIECE_DIMENSION; i++)
+        {
+            if ( i > 0 && i%piece_cols == 0)
+            {
+                std::cout << std::endl;
+            }
+            std::cout << rotated_piece[i] << " ";
+        }
+
         // if can rotate
         //   calculate new grid indexes for rotated piece
         //   clear current occupied grid indexes
