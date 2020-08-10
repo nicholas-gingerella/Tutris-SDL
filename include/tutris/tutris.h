@@ -6,6 +6,7 @@ namespace tutris
     const int FIELD_WIDTH = 16;
     const int FIELD_HEIGHT = 32;
     const int BLOCK_SIZE_PIXEL = 10;
+    const int PIECE_DIMENSION = 16;
 
     enum tetromino_shape
     {
@@ -13,6 +14,7 @@ namespace tutris
         line,
         square,
         el,
+        test,
         random
     };
 
