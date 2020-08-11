@@ -68,6 +68,7 @@ int main(int argc, char **argv)
     Field game_field(100, 100, tutris::FIELD_WIDTH, tutris::FIELD_HEIGHT);
     SDL_Event event;
     bool game_running = true;
+    bool game_over = false;
 
     // Game loop
     while (game_running)
@@ -80,6 +81,12 @@ int main(int argc, char **argv)
             if (event.type == SDL_QUIT)
             {
                 game_running = false;
+            }
+
+            if (game_over)
+            {
+                // once the game ends, wait for player to press X
+                continue;
             }
 
             if (event.type == SDL_KEYDOWN)
@@ -113,7 +120,15 @@ int main(int argc, char **argv)
             // game_field.addPiece(tutris::tetromino_shape::tee);
             // game_field.addPiece(tutris::tetromino_shape::line);
             // game_field.addPiece(tutris::tetromino_shape::square);
-             game_field.addPiece(tutris::tetromino_shape::test);
+            if (!game_field.addPiece(tutris::tetromino_shape::test))
+            {
+                // We failed to add a piece to the field.
+                // the piece spawns at the top of the field.
+                // if we failed to spawn a piece at the top due
+                // to collision, then the game is over.
+                std::cout << "GAME OVER!!!" << std::endl;
+                game_over = true;
+            }
         }
 
         // Render
@@ -123,6 +138,8 @@ int main(int argc, char **argv)
         game_field.render(renderer);
         SDL_RenderPresent(renderer);
     }
+
+
 
     SDL_Utils::cleanup(renderer, window);
     SDL_Quit();

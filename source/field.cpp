@@ -157,11 +157,11 @@ void Field::printField()
     std::cout << std::endl;
 }
 
-void Field::addPiece(tutris::tetromino_shape shape)
+bool Field::addPiece(tutris::tetromino_shape shape)
 {
     if (m_piece_active)
     {
-        return;
+        return false;
     }
 
     m_piece_active = true;
@@ -187,12 +187,66 @@ void Field::addPiece(tutris::tetromino_shape shape)
         //   5 6
         //   7 8
         // Index for x/y-coordinate in grid: x-pos + y-pos*num_grid_cols
-        m_grid[(m_piece_pos_x + (i%local_cols)) + ((m_piece_pos_y + (i/local_cols)) * m_num_cols)] = m_piece_shape[i];
+
+        // Does adding the piece here cause a collision?
+        // If so, game over
+        // // Can we move to the right?
+            bool can_move = true;
+
+        // check collision with piece shape
+        for (int i = 0; i < tutris::PIECE_DIMENSION; i++)
+        {
+            // Index for x/y-coordinate in grid: x-pos + y-pos*num_grid_cols
+            // only do collision checks on solid parts of the piece shape
+            int curr_piece_index = i;
+            int grid_piece_x = m_piece_pos_x + (curr_piece_index % local_cols);
+            int grid_piece_y = m_piece_pos_y + (curr_piece_index/local_cols);
+            int target_grid_index = (grid_piece_x) + (grid_piece_y * m_num_cols);
+
+            if (m_piece_shape[curr_piece_index] == tutris::grid_cell_type::curr_piece)     
+            {
+                if(m_grid[target_grid_index] != tutris::grid_cell_type::curr_piece && m_grid[target_grid_index] != tutris::grid_cell_type::empty)
+                {
+                    can_move = false;
+                    break;
+                }
+            }
+        }
+
+        if (!can_move)
+        {
+            return false;
+        }
+        else
+        {
+            //place piece on grid
+            for (int i = 0; i < tutris::PIECE_DIMENSION; i++)
+            {
+                // Index for x/y-coordinate in grid: x-pos + y-pos*num_grid_cols
+                // only do collision checks on solid parts of the piece shape
+                int curr_piece_index = i;
+                int grid_piece_x = m_piece_pos_x + (curr_piece_index % local_cols);
+                int grid_piece_y = m_piece_pos_y + (curr_piece_index/local_cols);
+                int target_grid_index = grid_piece_x + (grid_piece_y * m_num_cols);
+
+                if (m_piece_shape[curr_piece_index] == tutris::grid_cell_type::curr_piece)     
+                {
+                    m_grid[target_grid_index] = m_piece_shape[i];
+                }
+            }
+        }
     }
+
+    return true;
 }
 
 void Field::movePiece(tutris::move_direction dir)
 {
+    if (m_piece_active == false)
+    {
+        return;
+    }
+
     switch (dir)
     {
         case tutris::move_direction::left:
@@ -335,6 +389,8 @@ void Field::movePiece(tutris::move_direction dir)
                     if(m_grid[target_grid_index] != tutris::grid_cell_type::curr_piece && m_grid[target_grid_index] != tutris::grid_cell_type::empty)
                     {
                         can_move = false;
+                        m_piece_active = false; //if we can't move down, then time to lock the piece
+                        
                         break;
                     }
                 }
@@ -360,6 +416,20 @@ void Field::movePiece(tutris::move_direction dir)
                     {
                         m_grid[(m_piece_pos_x + (i%local_cols)) + ((new_y_pos + (i/local_cols)) * m_num_cols)] = m_piece_shape[i];
                     }  
+                }
+            }
+            else
+            {
+                m_piece_active = false; //if we can't move down, then time to lock the piece
+                // lock and set piece in place
+                for (int i = 0; i < tutris::PIECE_DIMENSION; ++i)
+                {
+                    // Index for x/y-coordinate in grid: x-pos + y-pos*num_grid_cols
+                    if (m_piece_shape[i] == tutris::grid_cell_type::curr_piece)
+                    {
+                        // set the grid spot to a locked piece rather than an active piece
+                        m_grid[(m_piece_pos_x + (i%local_cols)) + ((m_piece_pos_y + (i/local_cols)) * m_num_cols)] = tutris::grid_cell_type::piece;
+                    }
                 }
             }
 

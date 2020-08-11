@@ -11,7 +11,7 @@ public:
     void render(SDL_Renderer *renderer);
     bool isFilled();
     void printField();
-    void addPiece(tutris::tetromino_shape piece);
+    bool addPiece(tutris::tetromino_shape piece);
     void movePiece(tutris::move_direction dir);
     void rotatePiece();
     bool isPieceActive();
