@@ -374,86 +374,92 @@ void Field::movePiece(tutris::move_direction dir)
 
 void Field::rotatePiece()
 {
-    std::cout << "Rotating piece from " << m_current_piece_rotation << std::endl;
     int piece_cols = 4;
     // rotation 0 = upright
     // rotation 1 = left 90
     // rotation 2 = 180
     // rotation 3 = left 270 (or right -90)
-    if (m_current_piece_rotation == 0)
-    {
-        // Check if rotation is possible (can't collide with anything)
-        // for each cell in in active piece
-        //  calculate new index for piece cell
-        //  if new index on grid is occupied by a wall or set piece
-        //    can't rotate piece, return
-        int rotated_piece [tutris::PIECE_DIMENSION];
-        for (int i = 0; i < tutris::PIECE_DIMENSION; i++)
-        {
-            // only do collision checks on solid parts of the piece shape
-            int x = i%piece_cols;
-            int y = i/piece_cols;
-            int target_index = 12-4*x+y;
-            rotated_piece[target_index] = m_piece_shape[i];
-        }
 
-        //DEBUG: Print out rotated piece
-        for (int i = 0; i < tutris::PIECE_DIMENSION; i++)
+    // Create rotated copy of our piece
+    int rotated_piece [tutris::PIECE_DIMENSION];
+    for (int i = 0; i < tutris::PIECE_DIMENSION; i++)
+    {
+        int x = i%piece_cols;
+        int y = i/piece_cols;
+        int target_index = 12-4*x+y; // rotate indexes CCW
+        rotated_piece[target_index] = m_piece_shape[i];
+    }
+
+    // Check if the rotated version of the piece collides
+    // with anything on the field
+    bool can_rotate = true;
+    for (int i = 0; i < tutris::PIECE_DIMENSION; i++)
+    {
+        // Index for x/y-coordinate in grid: x-pos + y-pos*num_grid_cols
+        int curr_piece_index = i;
+        int grid_piece_x = m_piece_pos_x + (curr_piece_index % piece_cols);
+        int grid_piece_y = m_piece_pos_y + (curr_piece_index/piece_cols);
+        int target_grid_index = (grid_piece_x) + (grid_piece_y * m_num_cols);
+
+        // only do collision checks on solid parts of the piece shape
+        if (rotated_piece[curr_piece_index] == tutris::grid_cell_type::curr_piece)     
         {
-            if ( i > 0 && i%piece_cols == 0)
+            if(m_grid[target_grid_index] != tutris::grid_cell_type::curr_piece && m_grid[target_grid_index] != tutris::grid_cell_type::empty)
             {
-                std::cout << std::endl;
+                can_rotate = false;
+                std::cout << "Cannot Rotate" << std::endl;
+                break;
             }
-            std::cout << rotated_piece[i] << " ";
+        }
+    }
+
+    //DEBUG: Print out rotated piece
+    for (int i = 0; i < tutris::PIECE_DIMENSION; i++)
+    {
+        if ( i > 0 && i%piece_cols == 0)
+        {
+            std::cout << std::endl;
+        }
+        std::cout << rotated_piece[i] << " ";
+    }
+    std::cout << std::endl;
+
+    if (can_rotate)
+    {
+        // clear current grid indexes
+        for (int i = 0; i < tutris::PIECE_DIMENSION; ++i)
+        {
+            // Index for x/y-coordinate in grid: x-pos + y-pos*num_grid_cols
+            // only clear grid index if a solid part of the piece is currently occupying it
+            int grid_index = (m_piece_pos_x + (i%piece_cols)) + ((m_piece_pos_y + (i/piece_cols)) * m_num_cols);
+            if (m_piece_shape[i] == tutris::grid_cell_type::curr_piece)
+            {
+                m_grid[grid_index] = 0;
+            }
         }
 
-        // if can rotate
-        //   calculate new grid indexes for rotated piece
-        //   clear current occupied grid indexes
-        //   set new grid index positions for each part of piece
-        //   set new rotation
-        m_current_piece_rotation = 1;
+        // update current piece shape to rotated version    
+        for (int i = 0; i < tutris::PIECE_DIMENSION; ++i)
+        {
+            m_piece_shape[i] = rotated_piece[i];
+        }
+
+        // populate grid positions
+        for (int i = 0; i < tutris::PIECE_DIMENSION; ++i)
+        {
+            // Index for x/y-coordinate in grid: x-pos + y-pos*num_grid_cols
+            int grid_index = (m_piece_pos_x + (i%piece_cols)) + ((m_piece_pos_y + (i/piece_cols)) * m_num_cols);
+            if (m_piece_shape[i] == tutris::grid_cell_type::curr_piece)
+            {
+                m_grid[grid_index] = m_piece_shape[i];
+            }
+        }
+        
+        std::cout << "Rotating piece from " << m_current_piece_rotation << std::endl;
+        m_current_piece_rotation++;
+        m_current_piece_rotation = m_current_piece_rotation % 4; //0,1,2,3,0,1,2,3,...
         std::cout << "new piece rotation is " << m_current_piece_rotation << std::endl;
     }
-    else if (m_current_piece_rotation == 1)
-    {
-        // Check if rotation is possible (can't collide with anything)
-        // if can rotate
-        //   calculate new grid indexes for rotated piece
-        //   clear current occupied grid indexes
-        //   set new grid index positions for each part of piece
-        //   set new rotation
-        m_current_piece_rotation = 2;
-        std::cout << "new piece rotation is " << m_current_piece_rotation << std::endl;
-    }
-    else if (m_current_piece_rotation == 2)
-    {
-        // Check if rotation is possible (can't collide with anything)
-        // if can rotate
-        //   calculate new grid indexes for rotated piece
-        //   clear current occupied grid indexes
-        //   set new grid index positions for each part of piece
-        //   set new rotation
-        m_current_piece_rotation = 3;
-        std::cout << "new piece rotation is " << m_current_piece_rotation << std::endl;
-    }
-    else if (m_current_piece_rotation == 3)
-    {
-        // Check if rotation is possible (can't collide with anything)
-        // if can rotate
-        //   calculate new grid indexes for rotated piece
-        //   clear current occupied grid indexes
-        //   set new grid index positions for each part of piece
-        //   set new rotation
-        m_current_piece_rotation = 0;
-        std::cout << "new piece rotation is " << m_current_piece_rotation << std::endl;
-    }
-    else
-    {
-        // invalid rotation, how did we get here?
-        std::cout << "Invalid rotation????" << std::endl;
-    }
-    
 }
 
 
