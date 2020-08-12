@@ -16,6 +16,8 @@ public:
   void render(SDL_Renderer *renderer);
   void printPiece();
   std::vector<int> getPiece();
+  void setShape(tutris::tetromino_shape shape);
+
 
 private:
   int pos_x, pos_y;

@@ -7,6 +7,8 @@
 
 #include <iostream>
 #include <string>
+#include <time.h>
+#include <stdlib.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include "my_utils/SDL_Utils.h"
@@ -65,7 +67,14 @@ int main(int argc, char **argv)
 
 
     // PROGRAM LOGIC STARTS HERE
+
+    // Seed random generator
+    srand(static_cast<unsigned>(time(NULL)));
+
     Field game_field(100, 100, tutris::FIELD_WIDTH, tutris::FIELD_HEIGHT);
+    unsigned int current_speed = 20; // piece moves down every 20 ticks
+    unsigned int speed_counter = 0;
+    bool force_down = false;
     SDL_Event event;
     bool game_running = true;
     bool game_over = false;
@@ -74,6 +83,18 @@ int main(int argc, char **argv)
     while (game_running)
     {
         // Time Step
+        // Super simple, just sleep 50ms per step (20 steps per second)
+        SDL_Delay(50);
+
+        // if we lost the game, don't bother with the counter anymore
+        if (!game_over)
+        {
+            speed_counter++;
+            if (speed_counter >= current_speed)
+            {
+                force_down = true;
+            }
+        }
 
         // input
         while(SDL_PollEvent(&event))
@@ -116,11 +137,7 @@ int main(int argc, char **argv)
         // Game logic
         if (!game_field.isPieceActive())
         {
-            // game_field.addPiece(tutris::tetromino_shape::el);
-            // game_field.addPiece(tutris::tetromino_shape::tee);
-            // game_field.addPiece(tutris::tetromino_shape::line);
-            // game_field.addPiece(tutris::tetromino_shape::square);
-            if (!game_field.addPiece(tutris::tetromino_shape::test))
+            if (!game_field.addPiece(tutris::tetromino_shape::random))
             {
                 // We failed to add a piece to the field.
                 // the piece spawns at the top of the field.
@@ -129,6 +146,13 @@ int main(int argc, char **argv)
                 std::cout << "GAME OVER!!!" << std::endl;
                 game_over = true;
             }
+        }
+
+        if (force_down && game_field.isPieceActive())
+        {
+            game_field.movePiece(tutris::move_direction::down);
+            speed_counter = 0;
+            force_down = false;
         }
 
         // Render

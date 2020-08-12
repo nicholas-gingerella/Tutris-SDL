@@ -14,6 +14,49 @@ pos_y(0)
 
 Tetromino::Tetromino(tutris::tetromino_shape s)
 {
+    setShape(s);
+}
+
+Tetromino::~Tetromino()
+{
+
+}
+
+void Tetromino::render(SDL_Renderer *renderer)
+{
+
+}
+
+void Tetromino::rotate()
+{
+
+}
+
+void Tetromino::move()
+{
+
+}
+
+void Tetromino::printPiece()
+{
+    for (int i = 0; i < 8; ++i)
+    {
+        if ( (i > 0) && (i % 2 == 0))
+        {
+            std::cout << std::endl;
+        }
+        std::cout << shape[i];
+
+    }
+}
+
+std::vector<int> Tetromino::getPiece()
+{
+    return shape;
+}
+
+void Tetromino::setShape(tutris::tetromino_shape s)
+{
     int p = tutris::grid_cell_type::curr_piece;
     switch (s)
     {
@@ -84,42 +127,4 @@ Tetromino::Tetromino(tutris::tetromino_shape s)
             break;
         }
     }
-}
-
-Tetromino::~Tetromino()
-{
-
-}
-
-void Tetromino::render(SDL_Renderer *renderer)
-{
-
-}
-
-void Tetromino::rotate()
-{
-
-}
-
-void Tetromino::move()
-{
-
-}
-
-void Tetromino::printPiece()
-{
-    for (int i = 0; i < 8; ++i)
-    {
-        if ( (i > 0) && (i % 2 == 0))
-        {
-            std::cout << std::endl;
-        }
-        std::cout << shape[i];
-
-    }
-}
-
-std::vector<int> Tetromino::getPiece()
-{
-    return shape;
 }

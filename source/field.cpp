@@ -1,4 +1,5 @@
 #include <iostream>
+#include <stdlib.h>
 #include <SDL2/SDL.h>
 #include "tutris/field.h"
 #include "tutris/tetromino.h"
@@ -69,10 +70,6 @@ m_piece_active(false)
         int grid_cell = tutris::grid_cell_type::wall;
         m_grid[i] = grid_cell;
     }
-
-    //TEST
-    m_grid[85] = tutris::grid_cell_type::wall;
-    m_grid[103] =tutris::grid_cell_type::wall;
 }
 
 Field::~Field()
@@ -164,10 +161,23 @@ bool Field::addPiece(tutris::tetromino_shape shape)
         return false;
     }
 
-    m_piece_active = true;
+    Tetromino piece;
 
     // choose a random piece
-    Tetromino piece(shape);
+    if (shape == tutris::tetromino_shape::random)
+    {
+        // get pseudo random number from 0 to num pieces
+        // random is the last enum entry, so it will be the
+        // upper bound
+        unsigned int random_shape = rand() % tutris::tetromino_shape::random;
+        piece.setShape(static_cast<tutris::tetromino_shape>(random_shape));
+    }
+    else
+    {
+        // set to passed in shape
+        piece.setShape(shape);
+    }
+    
     m_piece_shape.clear();
     m_piece_shape = piece.getPiece();
     m_current_piece_rotation = 0; // default to upright orientation
@@ -191,7 +201,7 @@ bool Field::addPiece(tutris::tetromino_shape shape)
         // Does adding the piece here cause a collision?
         // If so, game over
         // // Can we move to the right?
-            bool can_move = true;
+        bool can_move = true;
 
         // check collision with piece shape
         for (int i = 0; i < tutris::PIECE_DIMENSION; i++)
@@ -234,6 +244,8 @@ bool Field::addPiece(tutris::tetromino_shape shape)
                     m_grid[target_grid_index] = m_piece_shape[i];
                 }
             }
+
+            m_piece_active = true;
         }
     }
 
