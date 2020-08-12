@@ -16,9 +16,9 @@
 #include "tutris/tetromino.h"
 #include "tutris/tutris.h"
 
-const int SCREEN_WIDTH = 640;
-const int SCREEN_HEIGHT = 480;
-const int TILE_SIZE = 40;
+const int SCREEN_WIDTH = 1024;
+const int SCREEN_HEIGHT = 728;
+const int TILE_SIZE = 80;
 const int PAUSE_TIME_IN_SECONDS = 10;
 const int MILLISECONDS_IN_SECONDS = 1000;
 const int SDL_RENDERER_FIRST_AVAILABLE_DRIVER = -1;

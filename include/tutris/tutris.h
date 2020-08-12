@@ -5,8 +5,8 @@ namespace tutris
 {
     const int FIELD_WIDTH = 16;
     const int FIELD_HEIGHT = 32;
-    const int BLOCK_SIZE_PIXEL = 10;
-    const int PIECE_DIMENSION = 16;
+    const int BLOCK_SIZE_PIXEL = 15; // size of piece on screen (size x size pixels)
+    const int PIECE_DIMENSION = 16; // number of indexes in piece array
 
     enum tetromino_shape
     {
