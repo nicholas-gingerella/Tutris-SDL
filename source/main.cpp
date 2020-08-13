@@ -137,6 +137,43 @@ int main(int argc, char **argv)
         // Game logic
         if (!game_field.isPieceActive())
         {
+            // We are either at the very start of the game, or the current
+            // piece has been set in place. Are there any full lines of blocks
+            // that we can clear and award points for?
+            bool clearing_rows = false;
+            // scan field rows
+            //   if row is filled with pieces
+            //     mark row for clearing
+            //     clearing_rows = true;
+            //     award points
+
+            // Take note of what rows are marked for clearing.
+            // 1. is it more than one row?
+            //   * are they consecutive and more than 2? or are they single and spaced apart
+            // 2. are the rows consecutive? (right next to eachother?)
+            //   * cause a "collapse", all free floating pieces/caverns
+            //     collapse or cave in by moving all blocks down until they
+            //     can't move down anymore. Extra points
+            // 3. are they spaced apart?
+            //   * if marked rows are spaced apart and consist of only a single
+            //     row, then just move the blocks above it down by 1.
+
+            // if clearing rows (simple visual indicator)
+            // render field ()
+            // delay 1 second
+            // remove rows marked for clearing
+            // 
+            //  if a collapse is triggered (2 or more consecutive rows cleared)
+            //    scan field (bottom to top)
+            //    if block has a piece in it and piece can move down
+            //    move piece down (would cause hanging blocks to fall) //simple approach for now
+            //  
+            //  if no collapse triggered
+            //    for each row found as traversing from bottom to top of field
+            //      remove marked blocks in row
+            //      move all blocks above down by 1 until next cleared row is found
+
+
             if (!game_field.addPiece(tutris::tetromino_shape::random))
             {
                 // We failed to add a piece to the field.
