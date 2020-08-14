@@ -140,12 +140,7 @@ int main(int argc, char **argv)
             // We are either at the very start of the game, or the current
             // piece has been set in place. Are there any full lines of blocks
             // that we can clear and award points for?
-            bool clearing_rows = false;
-            // scan field rows
-            //   if row is filled with pieces
-            //     mark row for clearing
-            //     clearing_rows = true;
-            //     award points
+            std::vector<int> clear_rows = game_field.scanField();
 
             // Take note of what rows are marked for clearing.
             // 1. is it more than one row?
@@ -157,6 +152,22 @@ int main(int argc, char **argv)
             // 3. are they spaced apart?
             //   * if marked rows are spaced apart and consist of only a single
             //     row, then just move the blocks above it down by 1.
+            if (!clear_rows.empty())
+            {
+                // There are rows that need to be marked for clearing
+                std::cout << "Rows cleared" << std::endl;
+                std::vector<int>::iterator it;
+                for(it = clear_rows.begin(); it != clear_rows.end(); it++)
+                {
+                    std::cout << *it << std::endl;
+                }
+                game_field.markClearRows(clear_rows);
+                SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+                SDL_RenderClear(renderer);
+                game_field.render(renderer);
+                SDL_RenderPresent(renderer);
+                game_field.removeRows(clear_rows);
+            }
 
             // if clearing rows (simple visual indicator)
             // render field ()
@@ -174,7 +185,7 @@ int main(int argc, char **argv)
             //      move all blocks above down by 1 until next cleared row is found
 
 
-            if (!game_field.addPiece(tutris::tetromino_shape::random))
+            if (!game_field.addPiece(tutris::tetromino_shape::line))
             {
                 // We failed to add a piece to the field.
                 // the piece spawns at the top of the field.

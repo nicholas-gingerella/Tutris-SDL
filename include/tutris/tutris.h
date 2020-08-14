@@ -30,6 +30,7 @@ namespace tutris
         empty = 0,
         piece,
         curr_piece,
+        clearing,
         wall
     };
 }

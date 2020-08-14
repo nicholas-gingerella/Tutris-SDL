@@ -10,6 +10,7 @@ m_pos_x (0),
 m_pos_y (0),
 m_num_rows(0),
 m_num_cols(0),
+m_num_grid_cells(0),
 m_piece_pos_x(0),
 m_piece_pos_y(0),
 m_piece_active(false),
@@ -23,6 +24,7 @@ m_pos_x(x),
 m_pos_y(y),
 m_num_rows(rows),
 m_num_cols(cols),
+m_num_grid_cells(cols * rows),
 m_piece_pos_x(0),
 m_piece_pos_y(0),
 m_piece_active(false)
@@ -109,6 +111,13 @@ void Field::render(SDL_Renderer *renderer)
             SDL_SetRenderDrawColor( renderer, 0xFF,0x00,0x00,0xFF);
             SDL_RenderFillRect(renderer, &field_square);
             SDL_SetRenderDrawColor( renderer, 0x00,0x00,0x00,0xFF);
+            SDL_RenderDrawRect(renderer, &field_square);
+        }
+        else if (m_grid[i] == tutris::grid_cell_type::clearing)
+        {
+            SDL_SetRenderDrawColor( renderer, 0x20,0x20,0xC9,0xFF);
+            SDL_RenderFillRect(renderer, &field_square);
+            SDL_SetRenderDrawColor( renderer, 0xFF,0xFF,0xFF,0xFF);
             SDL_RenderDrawRect(renderer, &field_square);
         }
         else
@@ -489,22 +498,22 @@ void Field::rotatePiece()
             if(m_grid[target_grid_index] != tutris::grid_cell_type::curr_piece && m_grid[target_grid_index] != tutris::grid_cell_type::empty)
             {
                 can_rotate = false;
-                std::cout << "Cannot Rotate" << std::endl;
+                //std::cout << "Cannot Rotate" << std::endl;
                 break;
             }
         }
     }
 
-    //DEBUG: Print out rotated piece
-    for (int i = 0; i < tutris::PIECE_DIMENSION; i++)
-    {
-        if ( i > 0 && i%piece_cols == 0)
-        {
-            std::cout << std::endl;
-        }
-        std::cout << rotated_piece[i] << " ";
-    }
-    std::cout << std::endl;
+    // //DEBUG: Print out rotated piece
+    // for (int i = 0; i < tutris::PIECE_DIMENSION; i++)
+    // {
+    //     if ( i > 0 && i%piece_cols == 0)
+    //     {
+    //         std::cout << std::endl;
+    //     }
+    //     std::cout << rotated_piece[i] << " ";
+    // }
+    // std::cout << std::endl;
 
     if (can_rotate)
     {
@@ -537,10 +546,10 @@ void Field::rotatePiece()
             }
         }
         
-        std::cout << "Rotating piece from " << m_current_piece_rotation << std::endl;
+        // std::cout << "Rotating piece from " << m_current_piece_rotation << std::endl;
         m_current_piece_rotation++;
         m_current_piece_rotation = m_current_piece_rotation % 4; //0,1,2,3,0,1,2,3,...
-        std::cout << "new piece rotation is " << m_current_piece_rotation << std::endl;
+        // std::cout << "new piece rotation is " << m_current_piece_rotation << std::endl;
     }
 }
 
@@ -564,3 +573,90 @@ bool Field::moveBlock(int start_pos_x, int start_pos_y, int end_pos_x, int end_p
 
     return true;
 }
+
+unsigned int Field::getNumGridCells()
+{
+    return m_num_grid_cells;
+}
+unsigned int Field::getNumRows()
+{
+    return m_num_rows;
+}
+unsigned int Field::getNumCols()
+{
+    return m_num_cols;
+}
+
+std::vector<int> Field::scanField()
+{
+    // Scan field for filled in rows
+
+    // scan field rows
+    //   if row is filled with pieces
+    //     mark row for clearing
+    //     clearing_rows = true;
+    //     award points
+    bool clear_row_found = true;
+    std::vector<int> clear_row_nums;
+    for (int i = 0; i < m_num_grid_cells; i++)
+    {
+        // beginning of rows: 0, field width, 2 * field width, 3 * field width, etc.
+        if (i%m_num_cols == 0)
+        {
+            std::cout << "row number " << i/m_num_cols << std::endl;
+            // start of new row
+            // Only check for cleared row if we have already passed the first row
+            // index (0 = top left cell of grid)
+            if ((i >= m_num_cols) && clear_row_found)
+            {
+                // Add the row number to a list of rows to be cleared.
+                // row 0 (top) - row num_rows-1 (bottom)
+                // using the row number rather than index makes consecutive
+                // clear row calculation easier later on
+                std::cout << "clear row: " << i/m_num_cols << std::endl;
+                int current_row_number = i/m_num_cols;
+                clear_row_nums.push_back(current_row_number - 1); // row ABOVE current row needs to be cleared.
+            }
+            else
+            {
+                // reset to true to prepare for next row scan
+                clear_row_found = true;
+            }
+        }
+
+        // If there is a space in the row, then this is not a row that
+        // can be marked for clearing
+        if (m_grid[i] == tutris::grid_cell_type::empty || m_grid[i] == tutris::grid_cell_type::clearing) //clearing check can go away after actually clearing cells to empty
+        {
+            clear_row_found = false;
+        }
+    }
+
+    // return list of row numbers that can be cleared
+    std::cout << "clear row count: " << clear_row_nums.size() << std::endl;
+    return clear_row_nums;
+}
+
+void Field::markClearRows(std::vector<int> clear_rows)
+{
+    // Mark cells in rows that need to be cleared
+    std::vector<int>::iterator it;
+    for (it = clear_rows.begin(); it != clear_rows.end(); it++)
+    {
+        int row_number = *it;
+        int row_start_index = (row_number * m_num_cols);
+        int row_end_index = row_start_index + (m_num_cols - 1);
+        row_start_index++; // increase by 1, first col is a wall
+        for (int i = row_start_index; i < row_end_index; i++)
+        {
+            m_grid[i] = tutris::grid_cell_type::clearing;
+        }
+    }
+}
+
+void Field::removeRows(std::vector<int> clear_rows)
+{
+    std::cout << "Remove clear rows" << std::endl;
+}
+
+
