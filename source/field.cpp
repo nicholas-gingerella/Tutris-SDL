@@ -574,6 +574,45 @@ bool Field::moveBlock(int start_pos_x, int start_pos_y, int end_pos_x, int end_p
     return true;
 }
 
+bool Field::moveBlock(int grid_index, tutris::move_direction dir, int num_moves)
+{
+    // Current block location info
+    int start_index = grid_index;
+    int curr_x_pos = grid_index%m_num_cols;
+    int curr_y_pos = grid_index/m_num_cols;
+
+    // Target location default values
+    int target_index = start_index;
+    int target_y_pos = curr_y_pos;
+    int target_x_pos = curr_x_pos;
+
+    switch(dir)
+    {
+        case tutris::move_direction::down:
+        {
+
+            target_y_pos = curr_y_pos + num_moves; // +1 is down 1 on the board (top left is 0,0)
+            break;
+        }
+        default:
+        {
+            return false;
+            break;
+        }
+    }
+
+    target_index = target_x_pos + (target_y_pos * m_num_cols);
+    if (m_grid[target_index] != tutris::grid_cell_type::empty)
+    {
+        return false;
+    }
+
+    m_grid[start_index] = tutris::grid_cell_type::empty;
+    m_grid[target_index] = tutris::grid_cell_type::piece;
+
+    return true;
+}
+
 unsigned int Field::getNumGridCells()
 {
     return m_num_grid_cells;
@@ -656,7 +695,73 @@ void Field::markClearRows(std::vector<int> clear_rows)
 
 void Field::removeRows(std::vector<int> clear_rows)
 {
-    std::cout << "Remove clear rows" << std::endl;
+    std::vector<int>::iterator it;
+    for (it = clear_rows.begin(); it != clear_rows.end(); it++)
+    {
+        int row_number = *it;
+        int row_start_index = (row_number * m_num_cols);
+        int row_end_index = row_start_index + (m_num_cols - 1);
+        row_start_index++; // increase by 1, first col is a wall
+        for (int i = row_start_index; i < row_end_index; i++)
+        {
+            m_grid[i] = tutris::grid_cell_type::empty;
+        }
+    }
+}
+
+void Field::shiftFallingBlocks()
+{
+    // Scan field for filled in rows
+
+    // scan field rows from bottom to top
+    std::vector<int> clear_row_nums;
+    for (int i = m_num_grid_cells - 1 ; i >= 0; i--)
+    {
+        // If there is a space in the row, then this is not a row that
+        // can be marked for clearing
+        if (m_grid[i] == tutris::grid_cell_type::piece) //clearing check can go away after actually clearing cells to empty
+        {
+            
+            // if (collapse_triggerd)
+            //{
+            // collapse logic
+            //}
+            //else
+            //{
+            // regular fall logic. All blocks only fall the number of rows that were
+            // cleared below it
+            // a running total of rows cleared on the way up the grid.
+            // as number of rows currently cleared increases, so too does the number
+            // of blocks each piece needs to move down as you work your way up the board.
+            //}
+
+            // while block can move down, move block down. (Collapse logic)
+            int curr_block_index = i;
+            while(true)
+            {
+                 std::cout << "move block down: "  << curr_block_index << std::endl;
+                 if (!moveBlock(curr_block_index, tutris::move_direction::down))
+                 {
+                     std::cout << "Block can't move down" << std::endl;
+                     std::cout << "curr_block_index" << curr_block_index << std::endl;
+                     break;
+                 }
+                // moved down successfully, calculate new index for the next move down
+                int target_y = (curr_block_index/m_num_cols) + 1;
+                int current_x =  curr_block_index%m_num_cols;
+                curr_block_index = current_x + (target_y * m_num_cols);
+                std::cout << "curr block index: " << curr_block_index << std::endl;
+                std::cout << "curr x: " << current_x << std::endl;
+                std::cout << "target y: " << target_y << std::endl;
+                std::cout << "target index: " << curr_block_index << std::endl;
+            }
+
+
+        }
+    }
+
+    // return list of row numbers that can be cleared
+    std::cout << "clear row count: " << clear_row_nums.size() << std::endl;
 }
 
 

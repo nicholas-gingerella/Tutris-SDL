@@ -22,8 +22,8 @@ public:
     std::vector<int> scanField();
     void markClearRows(std::vector<int> clear_rows);
     void removeRows(std::vector<int> clear_rows);
-
-
+    void shiftFallingBlocks();
+    bool moveBlock(int grid_index, tutris::move_direction dir, int num_moves = 1);
 
 
 private:
