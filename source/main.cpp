@@ -168,7 +168,7 @@ int main(int argc, char **argv)
             //    for each row found as traversing from bottom to top of field
             //      remove marked blocks in row
             //      move all blocks above down by 1 until next cleared row is found
-            if (!clear_rows.empty())
+            while (!clear_rows.empty())
             {
                 // There are rows that need to be marked for clearing
                 std::cout << "Rows cleared" << std::endl;
@@ -196,10 +196,20 @@ int main(int argc, char **argv)
                 //NOTE: once the blocks shift into place (especially after collapse)
                 //      we need to re-check for rows that can be cleared again. and go
                 //      through the motions of clearing them from the field as well.
+                                // Re-Render screen with new rows marked for clearing
+                SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+                SDL_RenderClear(renderer);
+                game_field.render(renderer);
+                SDL_RenderPresent(renderer);
+
+                clear_rows.clear();
+                clear_rows = game_field.scanField();
             }
 
 
-            if (!game_field.addPiece(tutris::tetromino_shape::line))
+
+
+            if (!game_field.addPiece(tutris::tetromino_shape::random))
             {
                 // We failed to add a piece to the field.
                 // the piece spawns at the top of the field.
