@@ -71,9 +71,11 @@ int main(int argc, char **argv)
     // Seed random generator
     srand(static_cast<unsigned>(time(NULL)));
 
-    Field game_field(100, 100, tutris::FIELD_WIDTH, tutris::FIELD_HEIGHT);
-    unsigned int current_speed = 20; // piece moves down every 20 ticks
+    Field game_field(SCREEN_WIDTH/2 - ((tutris::FIELD_WIDTH/2)*tutris::BLOCK_SIZE_PIXEL), 100, tutris::FIELD_WIDTH, tutris::FIELD_HEIGHT);
+    unsigned int current_speed = 10; // piece moves down every 20 ticks
     unsigned int speed_counter = 0;
+    unsigned int elapsed_ms = 0;
+    unsigned int speed_up_interval = 30*1000; // speed up piece every 30s
     bool force_down = false;
     SDL_Event event;
     bool game_running = true;
@@ -85,6 +87,8 @@ int main(int argc, char **argv)
         // Time Step
         // Super simple, just sleep 50ms per step (20 steps per second)
         SDL_Delay(50);
+        elapsed_ms += 50;
+        std::cout << elapsed_ms << std::endl;
 
         // if we lost the game, don't bother with the counter anymore
         if (!game_over)
@@ -93,6 +97,20 @@ int main(int argc, char **argv)
             if (speed_counter >= current_speed)
             {
                 force_down = true;
+            }
+
+            if (elapsed_ms % speed_up_interval == 0)
+            {
+                if (current_speed > 1)
+                {
+                    current_speed--;
+                    std::cout << "SPEED UP: " << current_speed << std::endl;
+                }
+                else
+                {
+                    std::cout << "MAX SPEED REACHED " << current_speed << std::endl;
+                }
+                
             }
         }
 
@@ -196,8 +214,8 @@ int main(int argc, char **argv)
                 //NOTE: once the blocks shift into place (especially after collapse)
                 //      we need to re-check for rows that can be cleared again. and go
                 //      through the motions of clearing them from the field as well.
-                                // Re-Render screen with new rows marked for clearing
-                SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+                // Re-Render screen with new rows marked for clearing
+                SDL_SetRenderDrawColor(renderer, 0x26, 0x26, 0x26, 0xFF);
                 SDL_RenderClear(renderer);
                 game_field.render(renderer);
                 SDL_RenderPresent(renderer);
@@ -229,7 +247,7 @@ int main(int argc, char **argv)
 
         // Render
         // Clear screen to white before drawing scene
-        SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+        SDL_SetRenderDrawColor(renderer, 0x26, 0x26, 0x26, 0xFF);
         SDL_RenderClear(renderer);
         game_field.render(renderer);
         SDL_RenderPresent(renderer);

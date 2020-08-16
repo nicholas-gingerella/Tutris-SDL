@@ -39,9 +39,9 @@ m_piece_active(false)
         m_grid[i] = grid_cell;
     }
 
-    // create walls around perimeter of field
+    // create walls around perimeter of field (left wall, start on 2nd row)
     int counter = 1;
-    for (int i = 0; i < num_grid_elems; ++i)
+    for (int i = 2*m_num_cols; i < num_grid_elems; ++i)
     {
         int grid_cell = tutris::grid_cell_type::wall;
 
@@ -53,8 +53,8 @@ m_piece_active(false)
         counter++;
     }
 
-    // create walls around perimeter of field
-    for (int i = 0; i < num_grid_elems; ++i)
+    // create walls around perimeter of field (right wall, start on 2nd row)
+    for (int i = 2*m_num_cols; i < num_grid_elems; ++i)
     {
         int grid_cell = tutris::grid_cell_type::wall;
 
@@ -66,7 +66,7 @@ m_piece_active(false)
         counter++;
     }
 
-    // create walls around perimeter of field
+    // create walls around perimeter of field (bottom)
     for (int i = (num_grid_elems - m_num_cols); i < num_grid_elems; ++i)
     {
         int grid_cell = tutris::grid_cell_type::wall;
@@ -122,10 +122,13 @@ void Field::render(SDL_Renderer *renderer)
         }
         else
         {
-            SDL_SetRenderDrawColor( renderer, 0xFF,0xFF,0xFF,0xFF);
-            SDL_RenderFillRect(renderer, &field_square);
-            SDL_SetRenderDrawColor( renderer, 0xCC,0xCC,0xCC,0xFF);
-            SDL_RenderDrawRect(renderer, &field_square);
+            if (i > m_num_cols*2)
+            {
+                SDL_SetRenderDrawColor( renderer, 0x7D,0x7D,0x7D,0xFF);
+                SDL_RenderFillRect(renderer, &field_square);
+                // SDL_SetRenderDrawColor( renderer, 0xCC,0xCC,0xCC,0xFF);
+                // SDL_RenderDrawRect(renderer, &field_square);
+            }
         }
         
         if ( counter % m_num_cols == 0 )
