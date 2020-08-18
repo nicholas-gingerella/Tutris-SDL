@@ -758,8 +758,35 @@ void Field::shiftFallingBlocks()
                 std::cout << "target y: " << target_y << std::endl;
                 std::cout << "target index: " << curr_block_index << std::endl;
             }
+        }
+    }
+}
 
+void Field::regularFallLogic(std::vector<int> rows)
+{
+    // Scan field for filled in rows
+    std::sort(rows.begin(), rows.end(), std::greater<int>());
+    int num_drops = 0;
 
+    // scan field rows from bottom to top
+    std::vector<int> clear_row_nums;
+    for (int i = m_num_grid_cells - 1 ; i >= 0; i--)
+    {
+        int curr_row = i/m_num_cols;
+        bool is_first_of_row = i%m_num_cols == 0 ? true : false; // only want the check below to run once per row
+        if ( is_first_of_row && std::find(rows.begin(), rows.end(),curr_row) != rows.end()) // start of a clear row, increment number of drops for the next blocks we see on the way up the grid
+        {
+            num_drops++;
+        }
+
+        // If there is a space in the row, then this is not a row that
+        // can be marked for clearing
+        if (m_grid[i] == tutris::grid_cell_type::piece) //clearing check can go away after actually clearing cells to empty
+        {
+            // while block can move down, move block down. (Collapse logic)
+            int curr_block_index = i;
+            std::cout << "move block down: "  << curr_block_index << std::endl;
+            moveBlock(curr_block_index, tutris::move_direction::down, num_drops);
         }
     }
 

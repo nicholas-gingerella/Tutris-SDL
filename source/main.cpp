@@ -6,6 +6,7 @@
 //   SDL 2.0
 
 #include <iostream>
+#include <algorithm>
 #include <string>
 #include <time.h>
 #include <stdlib.h>
@@ -80,6 +81,7 @@ int main(int argc, char **argv)
     SDL_Event event;
     bool game_running = true;
     bool game_over = false;
+    unsigned int score = 0;
 
     // Game loop
     while (game_running)
@@ -187,7 +189,26 @@ int main(int argc, char **argv)
             //      remove marked blocks in row
             //      move all blocks above down by 1 until next cleared row is found
             while (!clear_rows.empty())
-            {
+            {   
+                // Is was a collapse triggered?
+                bool collapse = false;
+                int neighbor_rows = 1;
+                std::sort(clear_rows.begin(), clear_rows.end());
+                for (unsigned int i = 0; i < clear_rows.size()-1; i++)
+                {
+                    int curr = clear_rows[i];
+                    int next = clear_rows[i+1];
+                    if (next == curr+1)
+                    {
+                        neighbor_rows++;
+                    }
+                }
+                
+                if (neighbor_rows >= 2)
+                {
+                    collapse = true;
+                }
+                
                 // There are rows that need to be marked for clearing
                 std::cout << "Rows cleared" << std::endl;
                 std::vector<int>::iterator it;
@@ -209,8 +230,19 @@ int main(int argc, char **argv)
 
                 // Remove cleared rows (collapse blocks if necessary)
                 game_field.removeRows(clear_rows);
-                game_field.shiftFallingBlocks();
 
+                //if collapse logic
+                if (collapse)
+                {
+                    std::cout << "collapse logic" << std::endl;
+                    game_field.shiftFallingBlocks();
+                }
+                else
+                {
+                    std::cout << "standard fall" << std::endl;
+                    game_field.regularFallLogic(clear_rows);
+                }
+                
                 //NOTE: once the blocks shift into place (especially after collapse)
                 //      we need to re-check for rows that can be cleared again. and go
                 //      through the motions of clearing them from the field as well.
