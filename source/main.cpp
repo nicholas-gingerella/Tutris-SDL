@@ -73,7 +73,7 @@ int main(int argc, char **argv)
     srand(static_cast<unsigned>(time(NULL)));
 
     Field game_field(SCREEN_WIDTH/2 - ((tutris::FIELD_WIDTH/2)*tutris::BLOCK_SIZE_PIXEL), 100, tutris::FIELD_WIDTH, tutris::FIELD_HEIGHT);
-    unsigned int current_speed = 10; // piece moves down every 20 ticks
+    unsigned int piece_fall_counter = 10; // The lower the number, the faster the speed
     unsigned int speed_counter = 0;
     unsigned int elapsed_ms = 0;
     unsigned int speed_up_interval = 30*1000; // speed up piece every 30s
@@ -90,29 +90,23 @@ int main(int argc, char **argv)
         // Super simple, just sleep 50ms per step (20 steps per second)
         SDL_Delay(50);
         elapsed_ms += 50;
-        std::cout << elapsed_ms << std::endl;
+        
 
         // if we lost the game, don't bother with the counter anymore
         if (!game_over)
         {
             speed_counter++;
-            if (speed_counter >= current_speed)
+            if (speed_counter >= piece_fall_counter)
             {
                 force_down = true;
             }
 
             if (elapsed_ms % speed_up_interval == 0)
             {
-                if (current_speed > 1)
+                if (piece_fall_counter > 1)
                 {
-                    current_speed--;
-                    std::cout << "SPEED UP: " << current_speed << std::endl;
+                    piece_fall_counter--;
                 }
-                else
-                {
-                    std::cout << "MAX SPEED REACHED " << current_speed << std::endl;
-                }
-                
             }
         }
 
@@ -145,7 +139,7 @@ int main(int argc, char **argv)
                     case SDLK_DOWN:
                         game_field.movePiece(tutris::move_direction::down);
                         break;
-                    case SDLK_z:
+                    case SDLK_UP:
                         game_field.rotatePiece();
                         break;
                     default:
@@ -161,36 +155,11 @@ int main(int argc, char **argv)
             // piece has been set in place. Are there any full lines of blocks
             // that we can clear and award points for?
             std::vector<int> clear_rows = game_field.scanField();
-
-            // Take note of what rows are marked for clearing.
-            // 1. is it more than one row?
-            //   * are they consecutive and more than 2? or are they single and spaced apart
-            // 2. are the rows consecutive? (right next to eachother?)
-            //   * cause a "collapse", all free floating pieces/caverns
-            //     collapse or cave in by moving all blocks down until they
-            //     can't move down anymore. Extra points
-            // 3. are they spaced apart?
-            //   * if marked rows are spaced apart and consist of only a single
-            //     row, then just move the blocks above it down by 1.
-
-
-            // if clearing rows (simple visual indicator)
-            // render field ()
-            // delay 1 second
-            // remove rows marked for clearing
-            // 
-            //  if a collapse is triggered (2 or more consecutive rows cleared)
-            //    scan field (bottom to top)
-            //    if block has a piece in it and piece can move down
-            //    move piece down (would cause hanging blocks to fall) //simple approach for now
-            //  
-            //  if no collapse triggered
-            //    for each row found as traversing from bottom to top of field
-            //      remove marked blocks in row
-            //      move all blocks above down by 1 until next cleared row is found
             while (!clear_rows.empty())
             {   
-                // Is was a collapse triggered?
+                // Check the number of neighboring cleared rows
+                // to determine if this is a collapse, or a regular
+                // row clear
                 bool collapse = false;
                 int neighbor_rows = 1;
                 std::sort(clear_rows.begin(), clear_rows.end());
@@ -203,70 +172,79 @@ int main(int argc, char **argv)
                         neighbor_rows++;
                     }
                 }
-                
+
+                // Were two or more neighboring rows cleared at once?
+                // If so, trigger a collapse
                 if (neighbor_rows >= 2)
                 {
                     collapse = true;
                 }
-                
-                // There are rows that need to be marked for clearing
-                std::cout << "Rows cleared" << std::endl;
-                std::vector<int>::iterator it;
-                for(it = clear_rows.begin(); it != clear_rows.end(); it++)
-                {
-                    std::cout << *it << std::endl;
-                }
-                game_field.markClearRows(clear_rows);
 
-                // Re-Render screen with new rows marked for clearing
-                SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
-                SDL_RenderClear(renderer);
-                game_field.render(renderer);
-                SDL_RenderPresent(renderer);
-
-                // Play sound effect
-                // Delay 0.5s
-                SDL_Delay(500);
-
-                // Remove cleared rows (collapse blocks if necessary)
-                game_field.removeRows(clear_rows);
-
-                //if collapse logic
+                // Give player a bonus if they triggered a collapse
                 if (collapse)
                 {
-                    std::cout << "collapse logic" << std::endl;
-                    game_field.shiftFallingBlocks();
+                    score += tutris::SCORE_INCREMENT_COLLAPSE;
+                    piece_fall_counter += 2; // slow the active piece speed down
                 }
-                else
-                {
-                    std::cout << "standard fall" << std::endl;
-                    game_field.regularFallLogic(clear_rows);
-                }
-                
-                //NOTE: once the blocks shift into place (especially after collapse)
-                //      we need to re-check for rows that can be cleared again. and go
-                //      through the motions of clearing them from the field as well.
+
+                // Add standard score for cleared rows
+                score += clear_rows.size()*tutris::SCORE_INCREMENT_BASIC;
+                piece_fall_counter += 1; // slow the active piece speed down
+
+
                 // Re-Render screen with new rows marked for clearing
+                // Mark rows for clearing
+                game_field.markClearRows(clear_rows);
                 SDL_SetRenderDrawColor(renderer, 0x26, 0x26, 0x26, 0xFF);
                 SDL_RenderClear(renderer);
                 game_field.render(renderer);
                 SDL_RenderPresent(renderer);
 
+                // Play sound effect
+
+                // Delay 0.5s to emphasize cleared rows
+                if (!clear_rows.empty())
+                {
+                    SDL_Delay(500);
+                }
+
+                // Remove marked rows from the field so blocks can fall
+                game_field.removeRows(clear_rows);
+
+                // Trigger collapse fall logic, or regular fall logic
+                // for the blocks in the field
+                if (collapse)
+                {
+                    game_field.collapseBlocks();
+                }
+                else
+                {
+                    game_field.shiftBlocks(clear_rows);
+                }
+                
+                // Redraw Screen
+                SDL_SetRenderDrawColor(renderer, 0x26, 0x26, 0x26, 0xFF);
+                SDL_RenderClear(renderer);
+                game_field.render(renderer);
+                SDL_RenderPresent(renderer);
+
+                // All cleared rows now handled an put in place.
+                // Empty our list and scan field for more cleared
+                // rows now that blocks have fallen in place.
                 clear_rows.clear();
                 clear_rows = game_field.scanField();
             }
 
-
-
-
+            // We failed to add a piece to the field.
+            // the piece spawns at the top of the field.
+            // if we failed to spawn a piece at the top due
+            // to collision, then the game is over.
             if (!game_field.addPiece(tutris::tetromino_shape::random))
             {
-                // We failed to add a piece to the field.
-                // the piece spawns at the top of the field.
-                // if we failed to spawn a piece at the top due
-                // to collision, then the game is over.
-                std::cout << "GAME OVER!!!" << std::endl;
                 game_over = true;
+                std::cout << "GAME OVER" << std::endl;
+                std::cout << "SCORE: " << score << std::endl;
+                break;
             }
         }
 
@@ -277,8 +255,7 @@ int main(int argc, char **argv)
             force_down = false;
         }
 
-        // Render
-        // Clear screen to white before drawing scene
+        // Redraw screen
         SDL_SetRenderDrawColor(renderer, 0x26, 0x26, 0x26, 0xFF);
         SDL_RenderClear(renderer);
         game_field.render(renderer);

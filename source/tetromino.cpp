@@ -43,9 +43,9 @@ void Tetromino::printPiece()
     {
         if ( (i > 0) && (i % 2 == 0))
         {
-            std::cout << std::endl;
+            
         }
-        std::cout << shape[i];
+        
 
     }
 }

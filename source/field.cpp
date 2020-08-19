@@ -158,12 +158,12 @@ void Field::printField()
     {
         if ( (i > 0) && (i%m_num_cols == 0) )
         {
-            std::cout << std::endl;
+            
         }
-        std::cout << m_grid[i] << " ";
+        
     }
 
-    std::cout << std::endl;
+    
 }
 
 bool Field::addPiece(tutris::tetromino_shape shape)
@@ -501,7 +501,7 @@ void Field::rotatePiece()
             if(m_grid[target_grid_index] != tutris::grid_cell_type::curr_piece && m_grid[target_grid_index] != tutris::grid_cell_type::empty)
             {
                 can_rotate = false;
-                //std::cout << "Cannot Rotate" << std::endl;
+                //
                 break;
             }
         }
@@ -512,11 +512,11 @@ void Field::rotatePiece()
     // {
     //     if ( i > 0 && i%piece_cols == 0)
     //     {
-    //         std::cout << std::endl;
+    //         
     //     }
-    //     std::cout << rotated_piece[i] << " ";
+    //     
     // }
-    // std::cout << std::endl;
+    // 
 
     if (can_rotate)
     {
@@ -549,10 +549,10 @@ void Field::rotatePiece()
             }
         }
         
-        // std::cout << "Rotating piece from " << m_current_piece_rotation << std::endl;
+        // 
         m_current_piece_rotation++;
         m_current_piece_rotation = m_current_piece_rotation % 4; //0,1,2,3,0,1,2,3,...
-        // std::cout << "new piece rotation is " << m_current_piece_rotation << std::endl;
+        // 
     }
 }
 
@@ -645,7 +645,7 @@ std::vector<int> Field::scanField()
         // beginning of rows: 0, field width, 2 * field width, 3 * field width, etc.
         if (i%m_num_cols == 0)
         {
-            std::cout << "row number " << i/m_num_cols << std::endl;
+            
             // start of new row
             // Only check for cleared row if we have already passed the first row
             // index (0 = top left cell of grid)
@@ -655,7 +655,7 @@ std::vector<int> Field::scanField()
                 // row 0 (top) - row num_rows-1 (bottom)
                 // using the row number rather than index makes consecutive
                 // clear row calculation easier later on
-                std::cout << "clear row: " << i/m_num_cols << std::endl;
+                
                 int current_row_number = i/m_num_cols;
                 clear_row_nums.push_back(current_row_number - 1); // row ABOVE current row needs to be cleared.
             }
@@ -675,7 +675,7 @@ std::vector<int> Field::scanField()
     }
 
     // return list of row numbers that can be cleared
-    std::cout << "clear row count: " << clear_row_nums.size() << std::endl;
+    
     return clear_row_nums;
 }
 
@@ -712,7 +712,7 @@ void Field::removeRows(std::vector<int> clear_rows)
     }
 }
 
-void Field::shiftFallingBlocks()
+void Field::collapseBlocks()
 {
     // Scan field for filled in rows
 
@@ -742,27 +742,27 @@ void Field::shiftFallingBlocks()
             int curr_block_index = i;
             while(true)
             {
-                 std::cout << "move block down: "  << curr_block_index << std::endl;
+                 
                  if (!moveBlock(curr_block_index, tutris::move_direction::down))
                  {
-                     std::cout << "Block can't move down" << std::endl;
-                     std::cout << "curr_block_index" << curr_block_index << std::endl;
+                     
+                     
                      break;
                  }
                 // moved down successfully, calculate new index for the next move down
                 int target_y = (curr_block_index/m_num_cols) + 1;
                 int current_x =  curr_block_index%m_num_cols;
                 curr_block_index = current_x + (target_y * m_num_cols);
-                std::cout << "curr block index: " << curr_block_index << std::endl;
-                std::cout << "curr x: " << current_x << std::endl;
-                std::cout << "target y: " << target_y << std::endl;
-                std::cout << "target index: " << curr_block_index << std::endl;
+                
+                
+                
+                
             }
         }
     }
 }
 
-void Field::regularFallLogic(std::vector<int> rows)
+void Field::shiftBlocks(std::vector<int> rows)
 {
     // Scan field for filled in rows
     std::sort(rows.begin(), rows.end(), std::greater<int>());
@@ -785,13 +785,13 @@ void Field::regularFallLogic(std::vector<int> rows)
         {
             // while block can move down, move block down. (Collapse logic)
             int curr_block_index = i;
-            std::cout << "move block down: "  << curr_block_index << std::endl;
+            
             moveBlock(curr_block_index, tutris::move_direction::down, num_drops);
         }
     }
 
     // return list of row numbers that can be cleared
-    std::cout << "clear row count: " << clear_row_nums.size() << std::endl;
+    
 }
 
 
