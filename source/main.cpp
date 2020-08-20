@@ -8,10 +8,12 @@
 #include <iostream>
 #include <algorithm>
 #include <string>
+#include <sstream>
 #include <time.h>
 #include <stdlib.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+#include <SDL2/SDL_ttf.h>
 #include "my_utils/SDL_Utils.h"
 #include "tutris/field.h"
 #include "tutris/tetromino.h"
@@ -26,6 +28,7 @@ const int SDL_RENDERER_FIRST_AVAILABLE_DRIVER = -1;
 const std::string WINDOW_TITLE = "Tutris";
 SDL_Window *window = nullptr;
 SDL_Renderer *renderer = nullptr;
+std::stringstream score_str;
 
 int main(int argc, char **argv)
 {
@@ -37,6 +40,13 @@ int main(int argc, char **argv)
     {
         SDL_Utils::logSDLError(std::cout, "IMG_Init");
         return false;
+    }
+
+    if (TTF_Init() != 0)
+    {
+        SDL_Utils::logSDLError(std::cout, "TTF_Init");
+        SDL_Quit();
+        return 1;
     }
 
     SDL_Window *window = SDL_CreateWindow(WINDOW_TITLE.c_str(), 
@@ -73,7 +83,7 @@ int main(int argc, char **argv)
     srand(static_cast<unsigned>(time(NULL)));
 
     Field game_field(SCREEN_WIDTH/2 - ((tutris::FIELD_WIDTH/2)*tutris::BLOCK_SIZE_PIXEL), 100, tutris::FIELD_WIDTH, tutris::FIELD_HEIGHT);
-    unsigned int piece_fall_counter = 10; // The lower the number, the faster the speed
+    unsigned int piece_fall_counter = 5; // The lower the number, the faster the speed
     unsigned int speed_counter = 0;
     unsigned int elapsed_ms = 0;
     unsigned int speed_up_interval = 30*1000; // speed up piece every 30s
@@ -82,6 +92,18 @@ int main(int argc, char **argv)
     bool game_running = true;
     bool game_over = false;
     unsigned int score = 0;
+
+    const std::string resource_path = "../resources/fonts/";
+    SDL_Texture *tex_img;
+    score_str.str("");
+    score_str << "SCORE: ";
+    score_str << score;
+    SDL_Color color = {255, 255, 255, 255};
+    tex_img = SDL_Utils::renderText(score_str.str(),
+        resource_path + "sample.ttf",
+        color,
+        24,
+        renderer);
 
     // Game loop
     while (game_running)
@@ -184,12 +206,37 @@ int main(int argc, char **argv)
                 if (collapse)
                 {
                     score += tutris::SCORE_INCREMENT_COLLAPSE;
-                    piece_fall_counter += 2; // slow the active piece speed down
-                }
+                if (piece_fall_counter < 5)
+                {
+                    piece_fall_counter += 1; // slow the active piece speed down
+                }                }
 
                 // Add standard score for cleared rows
                 score += clear_rows.size()*tutris::SCORE_INCREMENT_BASIC;
-                piece_fall_counter += 1; // slow the active piece speed down
+                if (piece_fall_counter < 5)
+                {
+                    piece_fall_counter += 1; // slow the active piece speed down
+                }
+
+
+                // Load text
+                score_str.str("");
+                score_str << "SCORE: ";
+                score_str << score;
+                SDL_Color color = {255, 255, 255, 255};
+                tex_img = SDL_Utils::renderText(score_str.str(),
+                    resource_path + "sample.ttf",
+                    color,
+                    24,
+                    renderer);
+
+                if ( tex_img == nullptr )
+                {
+                    SDL_Utils::cleanup(renderer, window);
+                    TTF_Quit();
+                    SDL_Quit();
+                    return 1;
+                }
 
 
                 // Re-Render screen with new rows marked for clearing
@@ -198,6 +245,7 @@ int main(int argc, char **argv)
                 SDL_SetRenderDrawColor(renderer, 0x26, 0x26, 0x26, 0xFF);
                 SDL_RenderClear(renderer);
                 game_field.render(renderer);
+                SDL_Utils::renderTexture(tex_img, renderer, SCREEN_WIDTH/2 + (game_field.getNumCols()*tutris::BLOCK_SIZE_PIXEL)/2 + 10, SCREEN_HEIGHT/2 - (game_field.getNumRows()*tutris::BLOCK_SIZE_PIXEL)/2);
                 SDL_RenderPresent(renderer);
 
                 // Play sound effect
@@ -226,6 +274,7 @@ int main(int argc, char **argv)
                 SDL_SetRenderDrawColor(renderer, 0x26, 0x26, 0x26, 0xFF);
                 SDL_RenderClear(renderer);
                 game_field.render(renderer);
+                SDL_Utils::renderTexture(tex_img, renderer, SCREEN_WIDTH/2 + (game_field.getNumCols()*tutris::BLOCK_SIZE_PIXEL)/2 + 10, SCREEN_HEIGHT/2 - (game_field.getNumRows()*tutris::BLOCK_SIZE_PIXEL)/2);
                 SDL_RenderPresent(renderer);
 
                 // All cleared rows now handled an put in place.
@@ -255,10 +304,13 @@ int main(int argc, char **argv)
             force_down = false;
         }
 
+
+
         // Redraw screen
         SDL_SetRenderDrawColor(renderer, 0x26, 0x26, 0x26, 0xFF);
         SDL_RenderClear(renderer);
         game_field.render(renderer);
+        SDL_Utils::renderTexture(tex_img, renderer, SCREEN_WIDTH/2 + (game_field.getNumCols()*tutris::BLOCK_SIZE_PIXEL)/2 + 10, SCREEN_HEIGHT/2 - (game_field.getNumRows()*tutris::BLOCK_SIZE_PIXEL)/2);
         SDL_RenderPresent(renderer);
     }
 
