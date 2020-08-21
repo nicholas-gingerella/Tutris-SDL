@@ -13,6 +13,7 @@
 #include <stdlib.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+#include <SDL2/SDL_mixer.h>
 #include <SDL2/SDL_ttf.h>
 #include "my_utils/SDL_Utils.h"
 #include "tutris/field.h"
@@ -29,6 +30,9 @@ const std::string WINDOW_TITLE = "Tutris";
 SDL_Window *window = nullptr;
 SDL_Renderer *renderer = nullptr;
 std::stringstream score_str;
+Mix_Chunk *sfx_drop = nullptr;
+Mix_Chunk *sfx_collapse = nullptr;
+Mix_Chunk *sfx_row_clear = nullptr;
 
 int main(int argc, char **argv)
 {
@@ -36,6 +40,12 @@ int main(int argc, char **argv)
     // START SDL Setup Boilerplate
     ///////////////////////////////
     // Initialize SDL utilities, windows, and renderers
+    if ( SDL_Init( SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0 )
+    {
+        SDL_Utils::logSDLError(std::cout, "SDL_Init");
+        return false;
+    }
+
     if ( (IMG_Init(IMG_INIT_PNG) & IMG_INIT_PNG) != IMG_INIT_PNG )
     {
         SDL_Utils::logSDLError(std::cout, "IMG_Init");
@@ -45,6 +55,13 @@ int main(int argc, char **argv)
     if (TTF_Init() != 0)
     {
         SDL_Utils::logSDLError(std::cout, "TTF_Init");
+        SDL_Quit();
+        return 1;
+    }
+
+    if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0)
+    {
+        std::cout << Mix_GetError() << std::endl;;
         SDL_Quit();
         return 1;
     }
@@ -72,6 +89,29 @@ int main(int argc, char **argv)
         SDL_Quit();
         return 1;
     }
+
+    sfx_drop = Mix_LoadWAV("../resources/sounds/drop.wav");
+    if (sfx_drop == nullptr)
+    {
+        std::cout << Mix_GetError() << std::endl;
+        SDL_Utils::cleanup(window);
+        SDL_Quit();
+    }
+    sfx_collapse = Mix_LoadWAV("../resources/sounds/collapse.wav");
+    if (sfx_collapse == nullptr)
+    {
+        std::cout << Mix_GetError() << std::endl;
+        SDL_Utils::cleanup(window);
+        SDL_Quit();
+    }
+    sfx_row_clear = Mix_LoadWAV("../resources/sounds/row_clear.wav");
+    if (sfx_row_clear == nullptr)
+    {
+        std::cout << Mix_GetError() << std::endl;
+        SDL_Utils::cleanup(window);
+        SDL_Quit();
+    }
+
     ///////////////////////////////
     // END SDL Setup Boilerplate
     ///////////////////////////////
@@ -206,10 +246,11 @@ int main(int argc, char **argv)
                 if (collapse)
                 {
                     score += tutris::SCORE_INCREMENT_COLLAPSE;
-                if (piece_fall_counter < 5)
-                {
-                    piece_fall_counter += 1; // slow the active piece speed down
-                }                }
+                    if (piece_fall_counter < 5)
+                    {
+                        piece_fall_counter += 1; // slow the active piece speed down
+                    }
+                }
 
                 // Add standard score for cleared rows
                 score += clear_rows.size()*tutris::SCORE_INCREMENT_BASIC;
@@ -234,6 +275,8 @@ int main(int argc, char **argv)
                 {
                     SDL_Utils::cleanup(renderer, window);
                     TTF_Quit();
+                    IMG_Quit();
+                    Mix_Quit();
                     SDL_Quit();
                     return 1;
                 }
@@ -249,6 +292,15 @@ int main(int argc, char **argv)
                 SDL_RenderPresent(renderer);
 
                 // Play sound effect
+                if (collapse)
+                {
+                    Mix_PlayChannel(-1, sfx_row_clear, 0);
+                }
+                else
+                {
+                    Mix_PlayChannel(-1, sfx_collapse, 0);
+                }
+                
 
                 // Delay 0.5s to emphasize cleared rows
                 if (!clear_rows.empty())
@@ -295,6 +347,11 @@ int main(int argc, char **argv)
                 std::cout << "SCORE: " << score << std::endl;
                 break;
             }
+            else
+            {
+                Mix_PlayChannel(-1, sfx_drop, 0);
+            }
+            
         }
 
         if (force_down && game_field.isPieceActive())
@@ -314,9 +371,13 @@ int main(int argc, char **argv)
         SDL_RenderPresent(renderer);
     }
 
-
-
+    Mix_FreeChunk(sfx_drop);
+    Mix_FreeChunk(sfx_collapse);
+    Mix_FreeChunk(sfx_row_clear);
     SDL_Utils::cleanup(renderer, window);
+    Mix_Quit();
+    IMG_Quit();
+    TTF_Quit();
     SDL_Quit();
     return 0;
 }
