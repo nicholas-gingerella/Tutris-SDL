@@ -34,6 +34,7 @@ Mix_Music *bgm_game = nullptr;
 Mix_Chunk *sfx_drop = nullptr;
 Mix_Chunk *sfx_collapse = nullptr;
 Mix_Chunk *sfx_row_clear = nullptr;
+Mix_Chunk *sfx_gameover = nullptr;
 
 int main(int argc, char **argv)
 {
@@ -115,6 +116,13 @@ int main(int argc, char **argv)
     }
     sfx_row_clear = Mix_LoadWAV("../resources/sounds/row_clear.wav");
     if (sfx_row_clear == nullptr)
+    {
+        std::cout << Mix_GetError() << std::endl;
+        SDL_Utils::cleanup(window);
+        SDL_Quit();
+    }
+    sfx_gameover = Mix_LoadWAV("../resources/sounds/gameover.wav");
+    if (sfx_gameover == nullptr)
     {
         std::cout << Mix_GetError() << std::endl;
         SDL_Utils::cleanup(window);
@@ -227,6 +235,12 @@ int main(int argc, char **argv)
         }
 
         // Game logic
+        if (game_over)
+        {
+            // once the game ends, wait for player to press X
+            continue;
+        }
+        
         if (!game_field.isPieceActive())
         {
             // We are either at the very start of the game, or the current
@@ -358,16 +372,21 @@ int main(int argc, char **argv)
             // to collision, then the game is over.
             if (!game_field.addPiece(tutris::tetromino_shape::random))
             {
+                if (Mix_PlayingMusic() != 0)
+                {
+                    Mix_HaltMusic();
+                }
+                Mix_PlayChannel(-1, sfx_gameover, 0);
                 game_over = true;
                 std::cout << "GAME OVER" << std::endl;
                 std::cout << "SCORE: " << score << std::endl;
-                break;
+                SDL_Delay(3000);
+                continue;
             }
             else
             {
                 Mix_PlayChannel(-1, sfx_drop, 0);
             }
-            
         }
 
         if (force_down && game_field.isPieceActive())
