@@ -30,6 +30,7 @@ const std::string WINDOW_TITLE = "Tutris";
 SDL_Window *window = nullptr;
 SDL_Renderer *renderer = nullptr;
 std::stringstream score_str;
+Mix_Music *bgm_game = nullptr;
 Mix_Chunk *sfx_drop = nullptr;
 Mix_Chunk *sfx_collapse = nullptr;
 Mix_Chunk *sfx_row_clear = nullptr;
@@ -90,6 +91,14 @@ int main(int argc, char **argv)
         return 1;
     }
 
+    bgm_game = Mix_LoadMUS("../resources/music/bg_music.mp3");
+    if (bgm_game == nullptr)
+    {
+        std::cout << Mix_GetError() << std::endl;
+        SDL_Utils::cleanup(window);
+        SDL_Quit();
+    }
+
     sfx_drop = Mix_LoadWAV("../resources/sounds/drop.wav");
     if (sfx_drop == nullptr)
     {
@@ -146,6 +155,13 @@ int main(int argc, char **argv)
         renderer);
 
     // Game loop
+    // Start playing music
+    Mix_VolumeMusic(MIX_MAX_VOLUME);
+    if (Mix_PlayingMusic() == 0)
+    {
+        Mix_PlayMusic(bgm_game, -1);
+    }
+
     while (game_running)
     {
         // Time Step
