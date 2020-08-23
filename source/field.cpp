@@ -19,6 +19,7 @@ m_grid (nullptr)
 
 }
 
+
 Field::Field(int x, int y, int cols, int rows) :
 m_pos_x(x),
 m_pos_y(y),
@@ -35,6 +36,9 @@ m_piece_active(false)
     // initialize to empty
     for (int i = 0; i < num_grid_elems; ++i)
     {
+        // create block struct
+        // set block to type empty
+        // add to field
         int grid_cell = tutris::grid_cell_type::empty;
         m_grid[i] = grid_cell;
     }
@@ -43,6 +47,9 @@ m_piece_active(false)
     int counter = 1;
     for (int i = 2*m_num_cols; i < num_grid_elems; ++i)
     {
+        // create block struct
+        // set block to type wall
+        // add to field
         int grid_cell = tutris::grid_cell_type::wall;
 
         if ((counter % m_num_cols == 0))
@@ -56,6 +63,9 @@ m_piece_active(false)
     // create walls around perimeter of field (right wall, start on 2nd row)
     for (int i = 2*m_num_cols; i < num_grid_elems; ++i)
     {
+        // create block struct
+        // set block to type wall
+        // add to field
         int grid_cell = tutris::grid_cell_type::wall;
 
         if ((i % m_num_cols == 0))
@@ -69,10 +79,14 @@ m_piece_active(false)
     // create walls around perimeter of field (bottom)
     for (int i = (num_grid_elems - m_num_cols); i < num_grid_elems; ++i)
     {
+        // create block struct
+        // set block to type wall
+        // add to field
         int grid_cell = tutris::grid_cell_type::wall;
         m_grid[i] = grid_cell;
     }
 }
+
 
 Field::~Field()
 {
@@ -81,6 +95,7 @@ Field::~Field()
         delete[] m_grid;
     }
 }
+
 
 void Field::render(SDL_Renderer *renderer)
 {
@@ -97,9 +112,12 @@ void Field::render(SDL_Renderer *renderer)
             tutris::BLOCK_SIZE_PIXEL
         };
 
+        // Check cell type of block at this grid index
+        // m_grid[i].type == tutris::grid_cell_type::wall
         if (m_grid[i] == tutris::grid_cell_type::wall)
         {
             //draw dark grey square
+            //draw wall using wall color defined in block.color
             SDL_SetRenderDrawColor( renderer, 0xCC,0xCC,0xCC,0xFF);
             SDL_RenderFillRect(renderer, &field_square);
             SDL_SetRenderDrawColor( renderer, 0x00,0x00,0x00,0xFF);
@@ -108,6 +126,7 @@ void Field::render(SDL_Renderer *renderer)
         else if (m_grid[i] == tutris::grid_cell_type::piece || m_grid[i] == tutris::grid_cell_type::curr_piece)
         {
             //draw square
+            //draw block using color defined in block.color
             SDL_SetRenderDrawColor( renderer, 0xFF,0x00,0x00,0xFF);
             SDL_RenderFillRect(renderer, &field_square);
             SDL_SetRenderDrawColor( renderer, 0x00,0x00,0x00,0xFF);
@@ -115,6 +134,7 @@ void Field::render(SDL_Renderer *renderer)
         }
         else if (m_grid[i] == tutris::grid_cell_type::clearing)
         {
+            //draw block using color defined in block.color
             SDL_SetRenderDrawColor( renderer, 0x20,0x20,0xC9,0xFF);
             SDL_RenderFillRect(renderer, &field_square);
             SDL_SetRenderDrawColor( renderer, 0xFF,0xFF,0xFF,0xFF);
@@ -122,15 +142,16 @@ void Field::render(SDL_Renderer *renderer)
         }
         else
         {
+            // Start drawing background color only after the first two
+            // rows
             if (i > m_num_cols*2)
             {
                 SDL_SetRenderDrawColor( renderer, 0x7D,0x7D,0x7D,0xFF);
                 SDL_RenderFillRect(renderer, &field_square);
-                // SDL_SetRenderDrawColor( renderer, 0xCC,0xCC,0xCC,0xFF);
-                // SDL_RenderDrawRect(renderer, &field_square);
             }
         }
         
+        //  Current index is the start of the next row
         if ( counter % m_num_cols == 0 )
         {
             // move to next row
@@ -146,10 +167,12 @@ void Field::render(SDL_Renderer *renderer)
     }
 }
 
+
 bool Field::isFilled()
 {
     return false;
 }
+
 
 void Field::printField()
 {
@@ -160,11 +183,9 @@ void Field::printField()
         {
             
         }
-        
-    }
-
-    
+    } 
 }
+
 
 bool Field::addPiece(tutris::tetromino_shape shape)
 {
@@ -204,10 +225,16 @@ bool Field::addPiece(tutris::tetromino_shape shape)
         // from top left to bottom right.
         // change grid entry to '1' for solid blocks
         // Draw order for default piece orientation:
-        //   1 2
-        //   3 4
-        //   5 6
-        //   7 8
+        // +-------------------+
+        // |  0 |  1 |  2 |  3 |
+        // +-------------------+
+        // |  4 |  5 |  6 |  7 |
+        // +-------------------+
+        // |  8 |  9 | 10 | 11 |
+        // +-------------------+
+        // | 12 | 13 | 14 | 15 |
+        // +-------------------+
+
         // Index for x/y-coordinate in grid: x-pos + y-pos*num_grid_cols
 
         // Does adding the piece here cause a collision?
@@ -264,6 +291,7 @@ bool Field::addPiece(tutris::tetromino_shape shape)
     return true;
 }
 
+
 void Field::movePiece(tutris::move_direction dir)
 {
     if (m_piece_active == false)
@@ -287,7 +315,6 @@ void Field::movePiece(tutris::move_direction dir)
                 int curr_piece_index = i;
                 int grid_piece_x = m_piece_pos_x + (curr_piece_index % piece_cols);
                 int grid_piece_y = m_piece_pos_y + (curr_piece_index/piece_cols);
-                //int current_grid_index = grid_piece_x + (grid_piece_y * m_num_cols);
                 int target_grid_index = (grid_piece_x - 1) + (grid_piece_y * m_num_cols);
 
                 if (m_piece_shape[curr_piece_index] == tutris::grid_cell_type::curr_piece)     
@@ -298,13 +325,6 @@ void Field::movePiece(tutris::move_direction dir)
                         break;
                     }
                 }
-
-                // int grid_index = (new_x_pos + (i%piece_cols)) + ((m_piece_pos_y + (i/piece_cols)) * m_num_cols);
-                // if ((m_piece_shape[curr_piece_index] == 1) && (i%piece_cols == 0) && m_grid[grid_index] != 0)
-                // {
-                //     can_move = false;
-                //     break;
-                // }
             }
 
             if (can_move)
@@ -349,7 +369,6 @@ void Field::movePiece(tutris::move_direction dir)
                 int curr_piece_index = i;
                 int grid_piece_x = m_piece_pos_x + (curr_piece_index % local_cols);
                 int grid_piece_y = m_piece_pos_y + (curr_piece_index/local_cols);
-                //int current_grid_index = grid_piece_x + (grid_piece_y * m_num_cols);
                 int target_grid_index = (grid_piece_x + 1) + (grid_piece_y * m_num_cols);
 
                 if (m_piece_shape[curr_piece_index] == tutris::grid_cell_type::curr_piece)     
@@ -386,8 +405,6 @@ void Field::movePiece(tutris::move_direction dir)
                     }
                 }
             }
-
-           
             break;
         }
         case tutris::move_direction::down:
@@ -414,7 +431,6 @@ void Field::movePiece(tutris::move_direction dir)
                     {
                         can_move = false;
                         m_piece_active = false; //if we can't move down, then time to lock the piece
-                        
                         break;
                     }
                 }
@@ -444,7 +460,9 @@ void Field::movePiece(tutris::move_direction dir)
             }
             else
             {
-                m_piece_active = false; //if we can't move down, then time to lock the piece
+                //if we can't move down, then time to lock the piece
+                m_piece_active = false;
+
                 // lock and set piece in place
                 for (int i = 0; i < tutris::PIECE_DIMENSION; ++i)
                 {
@@ -466,13 +484,10 @@ void Field::movePiece(tutris::move_direction dir)
     }
 }
 
+
 void Field::rotatePiece()
 {
     int piece_cols = 4;
-    // rotation 0 = upright
-    // rotation 1 = left 90
-    // rotation 2 = 180
-    // rotation 3 = left 270 (or right -90)
 
     // Create rotated copy of our piece
     int rotated_piece [tutris::PIECE_DIMENSION];
@@ -507,17 +522,6 @@ void Field::rotatePiece()
         }
     }
 
-    // //DEBUG: Print out rotated piece
-    // for (int i = 0; i < tutris::PIECE_DIMENSION; i++)
-    // {
-    //     if ( i > 0 && i%piece_cols == 0)
-    //     {
-    //         
-    //     }
-    //     
-    // }
-    // 
-
     if (can_rotate)
     {
         // clear current grid indexes
@@ -549,10 +553,8 @@ void Field::rotatePiece()
             }
         }
         
-        // 
         m_current_piece_rotation++;
         m_current_piece_rotation = m_current_piece_rotation % 4; //0,1,2,3,0,1,2,3,...
-        // 
     }
 }
 
@@ -561,6 +563,7 @@ bool Field::isPieceActive()
 {
     return m_piece_active;
 }
+
 
 bool Field::moveBlock(int start_pos_x, int start_pos_y, int end_pos_x, int end_pos_y)
 {
@@ -576,6 +579,7 @@ bool Field::moveBlock(int start_pos_x, int start_pos_y, int end_pos_x, int end_p
 
     return true;
 }
+
 
 bool Field::moveBlock(int grid_index, tutris::move_direction dir, int num_moves)
 {
@@ -616,28 +620,28 @@ bool Field::moveBlock(int grid_index, tutris::move_direction dir, int num_moves)
     return true;
 }
 
+
 unsigned int Field::getNumGridCells()
 {
     return m_num_grid_cells;
 }
+
+
 unsigned int Field::getNumRows()
 {
     return m_num_rows;
 }
+
+
 unsigned int Field::getNumCols()
 {
     return m_num_cols;
 }
 
+
 std::vector<int> Field::scanField()
 {
     // Scan field for filled in rows
-
-    // scan field rows
-    //   if row is filled with pieces
-    //     mark row for clearing
-    //     clearing_rows = true;
-    //     award points
     bool clear_row_found = true;
     std::vector<int> clear_row_nums;
     for (int i = 0; i < m_num_grid_cells; i++)
@@ -645,7 +649,6 @@ std::vector<int> Field::scanField()
         // beginning of rows: 0, field width, 2 * field width, 3 * field width, etc.
         if (i%m_num_cols == 0)
         {
-            
             // start of new row
             // Only check for cleared row if we have already passed the first row
             // index (0 = top left cell of grid)
@@ -655,7 +658,6 @@ std::vector<int> Field::scanField()
                 // row 0 (top) - row num_rows-1 (bottom)
                 // using the row number rather than index makes consecutive
                 // clear row calculation easier later on
-                
                 int current_row_number = i/m_num_cols;
                 clear_row_nums.push_back(current_row_number - 1); // row ABOVE current row needs to be cleared.
             }
@@ -668,16 +670,16 @@ std::vector<int> Field::scanField()
 
         // If there is a space in the row, then this is not a row that
         // can be marked for clearing
-        if (m_grid[i] == tutris::grid_cell_type::empty || m_grid[i] == tutris::grid_cell_type::clearing) //clearing check can go away after actually clearing cells to empty
+        if (m_grid[i] == tutris::grid_cell_type::empty || m_grid[i] == tutris::grid_cell_type::clearing)
         {
             clear_row_found = false;
         }
     }
 
     // return list of row numbers that can be cleared
-    
     return clear_row_nums;
 }
+
 
 void Field::markClearRows(std::vector<int> clear_rows)
 {
@@ -696,6 +698,7 @@ void Field::markClearRows(std::vector<int> clear_rows)
     }
 }
 
+
 void Field::removeRows(std::vector<int> clear_rows)
 {
     std::vector<int>::iterator it;
@@ -712,6 +715,7 @@ void Field::removeRows(std::vector<int> clear_rows)
     }
 }
 
+
 void Field::collapseBlocks()
 {
     // Scan field for filled in rows
@@ -724,20 +728,6 @@ void Field::collapseBlocks()
         // can be marked for clearing
         if (m_grid[i] == tutris::grid_cell_type::piece) //clearing check can go away after actually clearing cells to empty
         {
-            
-            // if (collapse_triggerd)
-            //{
-            // collapse logic
-            //}
-            //else
-            //{
-            // regular fall logic. All blocks only fall the number of rows that were
-            // cleared below it
-            // a running total of rows cleared on the way up the grid.
-            // as number of rows currently cleared increases, so too does the number
-            // of blocks each piece needs to move down as you work your way up the board.
-            //}
-
             // while block can move down, move block down. (Collapse logic)
             int curr_block_index = i;
             while(true)
@@ -745,22 +735,18 @@ void Field::collapseBlocks()
                  
                  if (!moveBlock(curr_block_index, tutris::move_direction::down))
                  {
-                     
-                     
                      break;
                  }
+
                 // moved down successfully, calculate new index for the next move down
                 int target_y = (curr_block_index/m_num_cols) + 1;
                 int current_x =  curr_block_index%m_num_cols;
                 curr_block_index = current_x + (target_y * m_num_cols);
-                
-                
-                
-                
             }
         }
     }
 }
+
 
 void Field::shiftBlocks(std::vector<int> rows)
 {
@@ -774,24 +760,21 @@ void Field::shiftBlocks(std::vector<int> rows)
     {
         int curr_row = i/m_num_cols;
         bool is_first_of_row = i%m_num_cols == 0 ? true : false; // only want the check below to run once per row
-        if ( is_first_of_row && std::find(rows.begin(), rows.end(),curr_row) != rows.end()) // start of a clear row, increment number of drops for the next blocks we see on the way up the grid
+
+        // start of a clear row, increment number of drops for the next blocks we see on the way up the grid
+        if ( is_first_of_row && std::find(rows.begin(), rows.end(),curr_row) != rows.end())
         {
             num_drops++;
         }
 
         // If there is a space in the row, then this is not a row that
         // can be marked for clearing
-        if (m_grid[i] == tutris::grid_cell_type::piece) //clearing check can go away after actually clearing cells to empty
+        if (m_grid[i] == tutris::grid_cell_type::piece)
         {
-            // while block can move down, move block down. (Collapse logic)
             int curr_block_index = i;
-            
             moveBlock(curr_block_index, tutris::move_direction::down, num_drops);
         }
-    }
-
-    // return list of row numbers that can be cleared
-    
+    }    
 }
 
 
