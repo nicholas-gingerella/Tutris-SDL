@@ -9,14 +9,13 @@ namespace tutris
     const int PIECE_DIMENSION = 16; // number of indexes in piece array
     const int SCORE_INCREMENT_BASIC = FIELD_WIDTH * 10;
     const int SCORE_INCREMENT_COLLAPSE = FIELD_WIDTH * 100;
-
     enum tetromino_shape
     {
         tee = 0,
         line,
         square,
         el,
-        test,
+        zee,
         random
     };
 
@@ -35,6 +34,33 @@ namespace tutris
         clearing,
         wall
     };
+
+    enum Color
+    {
+        white = 0,
+        red,
+        blue,
+        green,
+        yellow
+    };
+
+    typedef struct block_color
+    {
+        Color color;
+        unsigned int r;
+        unsigned int g;
+        unsigned int b;
+        unsigned int hex;
+    } block_color;
+    
+    typedef struct block
+    {
+        unsigned int pos_x;
+        unsigned int pos_y;
+        block_color color; //color enum
+        unsigned int block_type; // grid_cell_type enum
+        bool isActive;
+    } block;
 }
 
 #endif

@@ -87,9 +87,9 @@ void Tetromino::setShape(tutris::tetromino_shape s)
         case tutris::tetromino_shape::square:
         {
             int shape_square [tutris::PIECE_DIMENSION] = {
-                0,p,p,0,
-                0,p,p,0,
                 0,0,0,0,
+                0,p,p,0,
+                0,p,p,0,
                 0,0,0,0
             };
             shape.clear();
@@ -110,20 +110,18 @@ void Tetromino::setShape(tutris::tetromino_shape s)
         }
         case tutris::tetromino_shape::random:
         {
-            //int randShape[8] = tutris::getRandomShape()
-            //std::copy(std::begin(randShape), std::end(randShape), std::begin(shape));
             break;
         }
-        case tutris::tetromino_shape::test:
+        case tutris::tetromino_shape::zee:
         {
-            int shape_test [tutris::PIECE_DIMENSION] = {
+            int shape_zee [tutris::PIECE_DIMENSION] = {
                 0,0,p,0,
                 0,p,p,0,
                 0,p,0,0,
                 0,0,0,0
             };
             shape.clear();
-            shape.insert(shape.end(), &shape_test[0], &shape_test[tutris::PIECE_DIMENSION]);
+            shape.insert(shape.end(), &shape_zee[0], &shape_zee[tutris::PIECE_DIMENSION]);
             break;
         }
     }

@@ -143,6 +143,7 @@ int main(int argc, char **argv)
     unsigned int piece_fall_counter = 5; // The lower the number, the faster the speed
     unsigned int speed_counter = 0;
     unsigned int elapsed_ms = 0;
+    unsigned int max_speed_lock = 5*(60*1000); // used to max out speed if game is going on too long (5 mins)
     unsigned int speed_up_interval = 30*1000; // speed up piece every 30s
     bool force_down = false;
     SDL_Event event;
@@ -176,7 +177,14 @@ int main(int argc, char **argv)
         // Super simple, just sleep 50ms per step (20 steps per second)
         SDL_Delay(50);
         elapsed_ms += 50;
-        
+        if ((elapsed_ms >= max_speed_lock) && (piece_fall_counter > 2))
+        {
+            piece_fall_counter = 2; // make the game a bit more interesting
+        }
+        else if ((elapsed_ms >= 2*max_speed_lock))
+        {
+            piece_fall_counter = 1; // time to wrap this game up -__-
+        }
 
         // if we lost the game, don't bother with the counter anymore
         if (!game_over)
@@ -395,8 +403,6 @@ int main(int argc, char **argv)
             speed_counter = 0;
             force_down = false;
         }
-
-
 
         // Redraw screen
         SDL_SetRenderDrawColor(renderer, 0x26, 0x26, 0x26, 0xFF);
