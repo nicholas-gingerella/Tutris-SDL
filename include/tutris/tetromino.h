@@ -11,17 +11,13 @@ public:
   Tetromino();
   Tetromino(tutris::tetromino_shape shape);
   ~Tetromino();
-  void move();
-  void rotate();
-  void render(SDL_Renderer *renderer);
-  void printPiece();
   std::vector<tutris::block> getPiece();
-  void setShape(tutris::tetromino_shape shape);
+  void setShape(tutris::tetromino_shape shape, tutris::Color = tutris::red);
 
 
 private:
-  int pos_x, pos_y;
   std::vector<tutris::block> m_shape;
+  tutris::block_color getColorStruct(tutris::Color);
   
 };
 
