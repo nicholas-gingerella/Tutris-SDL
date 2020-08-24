@@ -214,7 +214,6 @@ bool Field::addPiece(tutris::tetromino_shape shape)
     
     m_piece_shape.clear();
     m_piece_shape = piece.getPiece();
-    m_current_piece_rotation = 0; // default to upright orientation
 
     // place piece at top of grid
     m_piece_pos_x = (m_num_cols/2) - 1;
@@ -255,7 +254,8 @@ bool Field::addPiece(tutris::tetromino_shape shape)
 
             if (m_piece_shape[curr_piece_index].block_type == tutris::grid_cell_type::curr_piece)     
             {
-                if(m_grid[target_grid_index].block_type != tutris::grid_cell_type::curr_piece && m_grid[target_grid_index].block_type != tutris::grid_cell_type::empty)
+                if( (m_grid[target_grid_index].block_type != tutris::grid_cell_type::curr_piece) &&
+                    (m_grid[target_grid_index].block_type != tutris::grid_cell_type::empty))
                 {
                     can_move = false;
                     break;
@@ -281,7 +281,7 @@ bool Field::addPiece(tutris::tetromino_shape shape)
 
                 if (m_piece_shape[curr_piece_index].block_type == tutris::grid_cell_type::curr_piece)     
                 {
-                    m_grid[target_grid_index].block_type = m_piece_shape[i].block_type;
+                    m_grid[target_grid_index] = m_piece_shape[i];
                 }
             }
 
@@ -320,7 +320,8 @@ void Field::movePiece(tutris::move_direction dir)
 
                 if (m_piece_shape[curr_piece_index].block_type == tutris::grid_cell_type::curr_piece)     
                 {
-                    if(m_grid[target_grid_index].block_type != tutris::grid_cell_type::curr_piece && m_grid[target_grid_index].block_type != tutris::grid_cell_type::empty)
+                    if( (m_grid[target_grid_index].block_type != tutris::grid_cell_type::curr_piece) && 
+                        (m_grid[target_grid_index].block_type != tutris::grid_cell_type::empty) )
                     {
                         can_move = false;
                         break;
@@ -336,7 +337,7 @@ void Field::movePiece(tutris::move_direction dir)
                     int grid_index = (m_piece_pos_x + (i%piece_cols)) + ((m_piece_pos_y + (i/piece_cols)) * m_num_cols);
                     if (m_piece_shape[i].block_type == tutris::grid_cell_type::curr_piece)
                     {
-                        m_grid[grid_index].block_type = 0;
+                        m_grid[grid_index].block_type = tutris::grid_cell_type::empty;
                     }
                 }
 
@@ -347,7 +348,8 @@ void Field::movePiece(tutris::move_direction dir)
                     // Index for x/y-coordinate in grid: x-pos + y-pos*num_grid_cols
                     if (m_piece_shape[i].block_type == tutris::grid_cell_type::curr_piece)
                     {
-                        m_grid[(m_piece_pos_x + (i%piece_cols)) + ((m_piece_pos_y + (i/piece_cols)) * m_num_cols)].block_type = m_piece_shape[i].block_type;
+                        int target_index = (m_piece_pos_x + (i%piece_cols)) + ((m_piece_pos_y + (i/piece_cols)) * m_num_cols);
+                        m_grid[target_index] = m_piece_shape[i];
                     }
                 }
             }
@@ -391,7 +393,7 @@ void Field::movePiece(tutris::move_direction dir)
                     int grid_index = (m_piece_pos_x + (i%local_cols)) + ((m_piece_pos_y + (i/local_cols)) * m_num_cols);
                     if (m_piece_shape[i].block_type == tutris::grid_cell_type::curr_piece)
                     {
-                      m_grid[grid_index].block_type = 0;
+                      m_grid[grid_index].block_type = tutris::grid_cell_type::empty;
                     }
                 }
                                 
@@ -402,7 +404,7 @@ void Field::movePiece(tutris::move_direction dir)
                     int grid_index = (m_piece_pos_x + (i%local_cols)) + ((m_piece_pos_y + (i/local_cols)) * m_num_cols);
                     if (m_piece_shape[i].block_type == tutris::grid_cell_type::curr_piece)
                     {
-                        m_grid[grid_index].block_type = m_piece_shape[i].block_type;
+                        m_grid[grid_index] = m_piece_shape[i];
                     }
                 }
             }
@@ -455,7 +457,7 @@ void Field::movePiece(tutris::move_direction dir)
                     // Index for x/y-coordinate in grid: x-pos + y-pos*num_grid_cols
                     if (m_piece_shape[i].block_type == tutris::grid_cell_type::curr_piece)
                     {
-                        m_grid[(m_piece_pos_x + (i%local_cols)) + ((new_y_pos + (i/local_cols)) * m_num_cols)].block_type = m_piece_shape[i].block_type;
+                        m_grid[(m_piece_pos_x + (i%local_cols)) + ((new_y_pos + (i/local_cols)) * m_num_cols)] = m_piece_shape[i];
                     }  
                 }
             }
@@ -475,7 +477,6 @@ void Field::movePiece(tutris::move_direction dir)
                     }
                 }
             }
-
             break;
         }
         default:
@@ -552,9 +553,6 @@ void Field::rotatePiece()
                 m_grid[grid_index].block_type = m_piece_shape[i].block_type;
             }
         }
-        
-        m_current_piece_rotation++;
-        m_current_piece_rotation = m_current_piece_rotation % 4; //0,1,2,3,0,1,2,3,...
     }
 }
 
