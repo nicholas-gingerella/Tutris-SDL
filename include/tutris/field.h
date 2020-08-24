@@ -39,6 +39,6 @@ private:
     bool m_piece_active;
     int m_current_piece_rotation;
     std::vector<int> m_piece_shape;
-    int *m_grid;
+    tutris::block* m_grid;
 };
 #endif
