@@ -50,62 +50,66 @@ void Tetromino::printPiece()
     }
 }
 
-std::vector<int> Tetromino::getPiece()
+std::vector<tutris::block> Tetromino::getPiece()
 {
-    return shape;
+    return m_shape;
 }
 
 void Tetromino::setShape(tutris::tetromino_shape s)
 {
-    int p = tutris::grid_cell_type::curr_piece;
+    tutris::block p;
+    p.block_type = tutris::grid_cell_type::curr_piece;
+
+    tutris::block o;
+    o.block_type = tutris::grid_cell_type::empty;
     switch (s)
     {
         case tutris::tetromino_shape::el:
         {
-            int shape_el [tutris::PIECE_DIMENSION] = {
-                0,0,p,0,
-                0,0,p,0,
-                0,0,p,0,
-                0,p,p,0
+            tutris::block shape_el [tutris::PIECE_DIMENSION] = {
+                o,o,p,o,
+                o,o,p,o,
+                o,o,p,o,
+                o,p,p,o
             };
-            shape.clear();
-            shape.insert(shape.end(), &shape_el[0], &shape_el[tutris::PIECE_DIMENSION]);
+            m_shape.clear();
+            m_shape.insert(m_shape.end(), &shape_el[0], &shape_el[tutris::PIECE_DIMENSION]);
             break;
         }
         case tutris::tetromino_shape::line:
         {
-            int shape_line [tutris::PIECE_DIMENSION] = {
-                0,0,p,0,
-                0,0,p,0,
-                0,0,p,0,
-                0,0,p,0
+            tutris::block shape_line [tutris::PIECE_DIMENSION] = {
+                o,o,p,o,
+                o,o,p,o,
+                o,o,p,o,
+                o,o,p,o
             };
-            shape.clear();
-            shape.insert(shape.end(), &shape_line[0], &shape_line[tutris::PIECE_DIMENSION]);
+            m_shape.clear();
+            m_shape.insert(m_shape.end(), &shape_line[0], &shape_line[tutris::PIECE_DIMENSION]);
             break; 
         }
         case tutris::tetromino_shape::square:
         {
-            int shape_square [tutris::PIECE_DIMENSION] = {
-                0,0,0,0,
-                0,p,p,0,
-                0,p,p,0,
-                0,0,0,0
+            tutris::block shape_square [tutris::PIECE_DIMENSION] = {
+                o,o,o,o,
+                o,p,p,o,
+                o,p,p,o,
+                o,o,o,o
             };
-            shape.clear();
-            shape.insert(shape.end(), &shape_square[0], &shape_square[tutris::PIECE_DIMENSION]);
+            m_shape.clear();
+            m_shape.insert(m_shape.end(), &shape_square[0], &shape_square[tutris::PIECE_DIMENSION]);
             break;
         }
         case tutris::tetromino_shape::tee:
         {
-            int shape_tee [tutris::PIECE_DIMENSION] = {
-                0,0,p,0,
-                0,p,p,0,
-                0,0,p,0,
-                0,0,0,0
+            tutris::block shape_tee [tutris::PIECE_DIMENSION] = {
+                o,o,p,o,
+                o,p,p,o,
+                o,o,p,o,
+                o,o,o,o
             };
-            shape.clear();
-            shape.insert(shape.end(), &shape_tee[0], &shape_tee[tutris::PIECE_DIMENSION]);
+            m_shape.clear();
+            m_shape.insert(m_shape.end(), &shape_tee[0], &shape_tee[tutris::PIECE_DIMENSION]);
             break;
         }
         case tutris::tetromino_shape::random:
@@ -114,14 +118,14 @@ void Tetromino::setShape(tutris::tetromino_shape s)
         }
         case tutris::tetromino_shape::zee:
         {
-            int shape_zee [tutris::PIECE_DIMENSION] = {
-                0,0,p,0,
-                0,p,p,0,
-                0,p,0,0,
-                0,0,0,0
+            tutris::block shape_zee [tutris::PIECE_DIMENSION] = {
+                o,o,p,o,
+                o,p,p,o,
+                o,p,o,o,
+                o,o,o,o
             };
-            shape.clear();
-            shape.insert(shape.end(), &shape_zee[0], &shape_zee[tutris::PIECE_DIMENSION]);
+            m_shape.clear();
+            m_shape.insert(m_shape.end(), &shape_zee[0], &shape_zee[tutris::PIECE_DIMENSION]);
             break;
         }
     }

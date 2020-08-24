@@ -38,7 +38,7 @@ private:
     int m_piece_pos_y;
     bool m_piece_active;
     int m_current_piece_rotation;
-    std::vector<int> m_piece_shape;
+    std::vector<tutris::block> m_piece_shape;
     tutris::block* m_grid;
 };
 #endif

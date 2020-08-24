@@ -15,13 +15,13 @@ public:
   void rotate();
   void render(SDL_Renderer *renderer);
   void printPiece();
-  std::vector<int> getPiece();
+  std::vector<tutris::block> getPiece();
   void setShape(tutris::tetromino_shape shape);
 
 
 private:
   int pos_x, pos_y;
-  std::vector<int> shape;
+  std::vector<tutris::block> m_shape;
   
 };
 
