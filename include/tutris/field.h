@@ -16,7 +16,7 @@ public:
     void movePiece(tutris::move_direction dir);
     void rotatePiece();
     bool isPieceActive();
-    bool moveBlock(int start_pos_x, int start_pos_y, int end_pos_x, int end_pos_y);
+    // bool moveBlock(int start_pos_x, int start_pos_y, int end_pos_x, int end_pos_y);
     unsigned int getNumGridCells();
     unsigned int getNumRows();
     unsigned int getNumCols();

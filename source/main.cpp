@@ -323,7 +323,7 @@ int main(int argc, char **argv)
                 // Re-Render screen with new rows marked for clearing
                 // Mark rows for clearing
                 game_field.markClearRows(clear_rows);
-                SDL_SetRenderDrawColor(renderer, 0x26, 0x26, 0x26, 0xFF);
+                SDL_SetRenderDrawColor(renderer, tutris::COLOR_BACKGROUND.r, tutris::COLOR_BACKGROUND.g, tutris::COLOR_BACKGROUND.b, 0xFF);
                 SDL_RenderClear(renderer);
                 game_field.render(renderer);
                 SDL_Utils::renderTexture(tex_img, renderer, SCREEN_WIDTH/2 + (game_field.getNumCols()*tutris::BLOCK_SIZE_PIXEL)/2 + 10, SCREEN_HEIGHT/2 - (game_field.getNumRows()*tutris::BLOCK_SIZE_PIXEL)/2);
@@ -361,7 +361,7 @@ int main(int argc, char **argv)
                 }
                 
                 // Redraw Screen
-                SDL_SetRenderDrawColor(renderer, 0x26, 0x26, 0x26, 0xFF);
+                SDL_SetRenderDrawColor(renderer, tutris::COLOR_BACKGROUND.r, tutris::COLOR_BACKGROUND.g, tutris::COLOR_BACKGROUND.b, 0xFF);
                 SDL_RenderClear(renderer);
                 game_field.render(renderer);
                 SDL_Utils::renderTexture(tex_img, renderer, SCREEN_WIDTH/2 + (game_field.getNumCols()*tutris::BLOCK_SIZE_PIXEL)/2 + 10, SCREEN_HEIGHT/2 - (game_field.getNumRows()*tutris::BLOCK_SIZE_PIXEL)/2);
@@ -405,7 +405,7 @@ int main(int argc, char **argv)
         }
 
         // Redraw screen
-        SDL_SetRenderDrawColor(renderer, 0x26, 0x26, 0x26, 0xFF);
+        SDL_SetRenderDrawColor(renderer, tutris::COLOR_BACKGROUND.r, tutris::COLOR_BACKGROUND.g, tutris::COLOR_BACKGROUND.b, 0xFF);
         SDL_RenderClear(renderer);
         game_field.render(renderer);
         SDL_Utils::renderTexture(tex_img, renderer, SCREEN_WIDTH/2 + (game_field.getNumCols()*tutris::BLOCK_SIZE_PIXEL)/2 + 10, SCREEN_HEIGHT/2 - (game_field.getNumRows()*tutris::BLOCK_SIZE_PIXEL)/2);
