@@ -45,6 +45,15 @@ namespace tutris
         yellow
     };
 
+    enum piece_color
+    {
+        piece_red = 0,
+        piece_blue,
+        piece_green,
+        piece_yellow,
+        piece_random
+    };
+
     typedef struct block_color
     {
         unsigned int r;
@@ -93,10 +102,10 @@ namespace tutris
     const block_color COLOR_BLUE(0x00, 0x14, 0x34);
     const block_color COLOR_YELLOW(0xE4, 0xE8, 0x00);
     const block_color COLOR_WHITE(0xFF, 0xFF, 0xFF);
-    const block_color COLOR_DARKGREY(0x47, 0x47, 0x47);
+    const block_color COLOR_DARKGREY(0x5E, 0x5E, 0x5E);
     const block_color COLOR_LIGHTGREY(0x7D, 0x7D, 0x7D);
     const block_color COLOR_BACKGROUND(0x21, 0x21, 0x21);
-    const block BLOCK_WALL(COLOR_YELLOW, grid_cell_type::wall);
+    const block BLOCK_WALL(COLOR_DARKGREY, grid_cell_type::wall);
     const block BLOCK_EMPTY(COLOR_LIGHTGREY, grid_cell_type::empty);
     const block BLOCK_CLEARING(COLOR_BLUEGREY, grid_cell_type::clearing);
 }

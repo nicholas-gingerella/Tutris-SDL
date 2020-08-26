@@ -21,11 +21,54 @@ std::vector<tutris::block> Tetromino::getPiece()
     return m_shape;
 }
 
-void Tetromino::setShape(tutris::tetromino_shape s, tutris::block_color color)
+void Tetromino::setShape(tutris::tetromino_shape s, tutris::piece_color color)
 {
     tutris::block p;
     p.block_type = tutris::grid_cell_type::curr_piece;
-    p.color = color;
+    int color_r, color_g, color_b;
+    switch (color)
+    {
+        case tutris::piece_color::piece_red:
+        {
+            color_r = tutris::COLOR_RED.r;
+            color_g = tutris::COLOR_RED.g;
+            color_b = tutris::COLOR_RED.b;
+            break;
+        }
+        case tutris::piece_color::piece_blue:
+        {
+            color_r = tutris::COLOR_LIGHTBLUE.r;
+            color_g = tutris::COLOR_LIGHTBLUE.g;
+            color_b = tutris::COLOR_LIGHTBLUE.b;
+            break;
+        }
+        case tutris::piece_color::piece_green:
+        {
+            color_r = tutris::COLOR_GREEN.r;
+            color_g = tutris::COLOR_GREEN.g;
+            color_b = tutris::COLOR_GREEN.b;
+            break;
+        }
+        case tutris::piece_color::piece_yellow:
+        {
+            color_r = tutris::COLOR_YELLOW.r;
+            color_g = tutris::COLOR_YELLOW.g;
+            color_b = tutris::COLOR_YELLOW.b;
+            break;
+        }
+        case tutris::piece_color::piece_random:
+            // intentional fall-through
+        default:
+        {
+            // Uh....we shouldn't get here...hopefully
+            color_r = tutris::COLOR_WHITE.r;
+            color_g = tutris::COLOR_WHITE.g;
+            color_b = tutris::COLOR_WHITE.b;
+            break;
+        }
+    }
+
+    p.color = {color_r, color_g, color_b};
 
     tutris::block o;
     o.block_type = tutris::grid_cell_type::empty;
@@ -97,58 +140,3 @@ void Tetromino::setShape(tutris::tetromino_shape s, tutris::block_color color)
         }
     }
 }
-
-// tutris::block_color Tetromino::getColorStruct(tutris::Color color)
-// {
-//     tutris::block_color c;
-
-//     unsigned int r, g, b;
-//     switch (color)
-//     {
-//         case tutris::Color::red:
-//         {
-//             r = 0xFF;
-//             g = 0x00;
-//             b = 0x00;
-//             break;
-//         }
-//         case tutris::Color::green:
-//         {
-//             r = 0x00;
-//             g = 0xFF;
-//             b = 0x00;
-//             break;
-//         }
-//         case tutris::Color::blue:
-//         {
-//             r = 0x00;
-//             g = 0x00;
-//             b = 0xFF;
-//             break;
-//         }
-//         case tutris::Color::yellow:
-//         {
-//             r = 0xE4;
-//             g = 0xE8;
-//             b = 0x00;
-//             break;
-//         }
-//         case tutris::Color::white:
-//         {
-//             r = 0x00;
-//             g = 0x00;
-//             b = 0x00;
-//             break;
-//         }
-//         default:
-//         {
-//             break;
-//         }
-//     }
-
-//     c.r = r;
-//     c.g = g;
-//     c.b = b;
-
-//     return c;
-// }

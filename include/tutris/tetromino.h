@@ -12,7 +12,7 @@ public:
   Tetromino(tutris::tetromino_shape shape);
   ~Tetromino();
   std::vector<tutris::block> getPiece();
-  void setShape(tutris::tetromino_shape shape, tutris::block_color = tutris::COLOR_RED);
+  void setShape(tutris::tetromino_shape shape, tutris::piece_color = tutris::piece_color::piece_red);
 
 
 private:

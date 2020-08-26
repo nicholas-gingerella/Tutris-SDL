@@ -177,7 +177,8 @@ bool Field::addPiece(tutris::tetromino_shape shape)
         // random is the last enum entry, so it will be the
         // upper bound
         unsigned int random_shape = rand() % tutris::tetromino_shape::random;
-        piece.setShape(static_cast<tutris::tetromino_shape>(random_shape), tutris::COLOR_LIGHTBLUE);
+        unsigned int random_piece_color = rand() % tutris::piece_color::piece_random;
+        piece.setShape(static_cast<tutris::tetromino_shape>(random_shape), static_cast<tutris::piece_color>(random_piece_color));
     }
     else
     {
