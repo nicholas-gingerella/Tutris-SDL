@@ -139,7 +139,7 @@ int main(int argc, char **argv)
     // Seed random generator
     srand(static_cast<unsigned>(time(NULL)));
 
-    Field game_field(SCREEN_WIDTH/2 - ((tutris::FIELD_WIDTH/2)*tutris::BLOCK_SIZE_PIXEL), 100, tutris::FIELD_WIDTH, tutris::FIELD_HEIGHT);
+    Field* game_field = new Field(SCREEN_WIDTH/2 - ((tutris::FIELD_WIDTH/2)*tutris::BLOCK_SIZE_PIXEL), 100, tutris::FIELD_WIDTH, tutris::FIELD_HEIGHT);
     unsigned int piece_fall_counter = 5; // The lower the number, the faster the speed
     unsigned int speed_counter = 0;
     unsigned int elapsed_ms = 0;
@@ -152,12 +152,15 @@ int main(int argc, char **argv)
     unsigned int score = 0;
 
     const std::string resource_path = "../resources/fonts/";
-    SDL_Texture *tex_img;
+    SDL_Texture *text_score;
+    SDL_Texture *text_game_over;
+    SDL_Texture *text_end_prompt;
+    SDL_Texture *text_end_prompt2;
     score_str.str("");
     score_str << "SCORE: ";
     score_str << score;
     SDL_Color color = {255, 255, 255, 255};
-    tex_img = SDL_Utils::renderText(score_str.str(),
+    text_score = SDL_Utils::renderText(score_str.str(),
         resource_path + "sample.ttf",
         color,
         24,
@@ -212,29 +215,63 @@ int main(int argc, char **argv)
                 game_running = false;
             }
 
-            if (game_over)
-            {
-                // once the game ends, wait for player to press X
-                continue;
-            }
-
             if (event.type == SDL_KEYDOWN)
             {
                 switch (event.key.keysym.sym)
                 {
-                    case SDLK_1:
-                        break;
                     case SDLK_LEFT:
-                        game_field.movePiece(tutris::move_direction::left);
+                        if (!game_over)
+                        {
+                            game_field->movePiece(tutris::move_direction::left);
+                        }
                         break;
                     case SDLK_RIGHT:
-                        game_field.movePiece(tutris::move_direction::right);
+                        if (!game_over)
+                        {
+                            game_field->movePiece(tutris::move_direction::right);
+                        }
                         break;
                     case SDLK_DOWN:
-                        game_field.movePiece(tutris::move_direction::down);
+                        if (!game_over)
+                        {
+                            game_field->movePiece(tutris::move_direction::down);
+                        }
                         break;
                     case SDLK_UP:
-                        game_field.rotatePiece();
+                        if (!game_over)
+                        {
+                            game_field->rotatePiece();
+                        }
+                        break;
+                    case SDLK_ESCAPE:
+                        if (game_over)
+                        {
+                            game_running = false;
+                        }
+                        break;
+                    case SDLK_SPACE:
+                        if (game_over)
+                        {
+                            game_over = false;
+                            delete game_field;
+                            game_field = new Field(SCREEN_WIDTH/2 - ((tutris::FIELD_WIDTH/2)*tutris::BLOCK_SIZE_PIXEL), 100, tutris::FIELD_WIDTH, tutris::FIELD_HEIGHT);
+                            score = 0;
+                            score_str.str("");
+                            score_str << "SCORE: ";
+                            score_str << score;
+                            SDL_Color color = {255, 255, 255, 255};
+                            text_score = SDL_Utils::renderText(score_str.str(),
+                                resource_path + "sample.ttf",
+                                color,
+                                24,
+                                renderer
+                            );
+
+                            if (Mix_PlayingMusic() == 0)
+                            {
+                                Mix_PlayMusic(bgm_game, -1);
+                            }
+                        }
                         break;
                     default:
                         break;
@@ -243,173 +280,247 @@ int main(int argc, char **argv)
         }
 
         // Game logic
-        if (game_over)
+        if (!game_over)
         {
-            // once the game ends, wait for player to press X
-            continue;
-        }
-        
-        if (!game_field.isPieceActive())
-        {
-            // We are either at the very start of the game, or the current
-            // piece has been set in place. Are there any full lines of blocks
-            // that we can clear and award points for?
-            std::vector<int> clear_rows = game_field.scanField();
-            while (!clear_rows.empty())
-            {   
-                // Check the number of neighboring cleared rows
-                // to determine if this is a collapse, or a regular
-                // row clear
-                bool collapse = false;
-                int neighbor_rows = 1;
-                std::sort(clear_rows.begin(), clear_rows.end());
-                for (unsigned int i = 0; i < clear_rows.size()-1; i++)
-                {
-                    int curr = clear_rows[i];
-                    int next = clear_rows[i+1];
-                    if (next == curr+1)
+            if (!game_field->isPieceActive())
+            {
+                // We are either at the very start of the game, or the current
+                // piece has been set in place. Are there any full lines of blocks
+                // that we can clear and award points for?
+                std::vector<int> clear_rows = game_field->scanField();
+                while (!clear_rows.empty())
+                {   
+                    // Check the number of neighboring cleared rows
+                    // to determine if this is a collapse, or a regular
+                    // row clear
+                    bool collapse = false;
+                    int neighbor_rows = 1;
+                    std::sort(clear_rows.begin(), clear_rows.end());
+                    for (unsigned int i = 0; i < clear_rows.size()-1; i++)
                     {
-                        neighbor_rows++;
+                        int curr = clear_rows[i];
+                        int next = clear_rows[i+1];
+                        if (next == curr+1)
+                        {
+                            neighbor_rows++;
+                        }
                     }
-                }
 
-                // Were two or more neighboring rows cleared at once?
-                // If so, trigger a collapse
-                if (neighbor_rows >= 2)
-                {
-                    collapse = true;
-                }
+                    // Were two or more neighboring rows cleared at once?
+                    // If so, trigger a collapse
+                    if (neighbor_rows >= 2)
+                    {
+                        collapse = true;
+                    }
 
-                // Give player a bonus if they triggered a collapse
-                if (collapse)
-                {
-                    score += tutris::SCORE_INCREMENT_COLLAPSE;
+                    // Give player a bonus if they triggered a collapse
+                    if (collapse)
+                    {
+                        score += tutris::SCORE_INCREMENT_COLLAPSE;
+                        if (piece_fall_counter < 5)
+                        {
+                            piece_fall_counter += 1; // slow the active piece speed down
+                        }
+                    }
+
+                    // Add standard score for cleared rows
+                    score += clear_rows.size()*tutris::SCORE_INCREMENT_BASIC;
                     if (piece_fall_counter < 5)
                     {
                         piece_fall_counter += 1; // slow the active piece speed down
                     }
+
+
+                    // Load text
+                    score_str.str("");
+                    score_str << "SCORE: ";
+                    score_str << score;
+                    SDL_Color color = {255, 255, 255, 255};
+                    text_score = SDL_Utils::renderText(score_str.str(),
+                        resource_path + "sample.ttf",
+                        color,
+                        24,
+                        renderer);
+
+                    if ( text_score == nullptr )
+                    {
+                        SDL_Utils::cleanup(renderer, window);
+                        TTF_Quit();
+                        IMG_Quit();
+                        Mix_Quit();
+                        SDL_Quit();
+                        return 1;
+                    }
+
+
+                    // Re-Render screen with new rows marked for clearing
+                    // Mark rows for clearing
+                    game_field->markClearRows(clear_rows);
+                    SDL_SetRenderDrawColor(renderer, tutris::COLOR_BACKGROUND.r, tutris::COLOR_BACKGROUND.g, tutris::COLOR_BACKGROUND.b, 0xFF);
+                    SDL_RenderClear(renderer);
+                    game_field->render(renderer);
+                    SDL_Utils::renderTexture(text_score, renderer, SCREEN_WIDTH/2 + (game_field->getNumCols()*tutris::BLOCK_SIZE_PIXEL)/2 + 10, SCREEN_HEIGHT/2 - (game_field->getNumRows()*tutris::BLOCK_SIZE_PIXEL)/2);
+                    SDL_RenderPresent(renderer);
+
+                    // Play sound effect
+                    if (collapse)
+                    {
+                        Mix_PlayChannel(-1, sfx_row_clear, 0);
+                    }
+                    else
+                    {
+                        Mix_PlayChannel(-1, sfx_collapse, 0);
+                    }
+                    
+
+                    // Delay 0.5s to emphasize cleared rows
+                    if (!clear_rows.empty())
+                    {
+                        SDL_Delay(500);
+                    }
+
+                    // Remove marked rows from the field so blocks can fall
+                    game_field->removeRows(clear_rows);
+
+                    // Trigger collapse fall logic, or regular fall logic
+                    // for the blocks in the field
+                    if (collapse)
+                    {
+                        game_field->collapseBlocks();
+                    }
+                    else
+                    {
+                        game_field->shiftBlocks(clear_rows);
+                    }
+                    
+                    // Redraw Screen
+                    SDL_SetRenderDrawColor(renderer, tutris::COLOR_BACKGROUND.r, tutris::COLOR_BACKGROUND.g, tutris::COLOR_BACKGROUND.b, 0xFF);
+                    SDL_RenderClear(renderer);
+                    game_field->render(renderer);
+                    SDL_Utils::renderTexture(text_score, renderer, SCREEN_WIDTH/2 + (game_field->getNumCols()*tutris::BLOCK_SIZE_PIXEL)/2 + 10, SCREEN_HEIGHT/2 - (game_field->getNumRows()*tutris::BLOCK_SIZE_PIXEL)/2);
+                    SDL_RenderPresent(renderer);
+
+                    // All cleared rows now handled an put in place.
+                    // Empty our list and scan field for more cleared
+                    // rows now that blocks have fallen in place.
+                    clear_rows.clear();
+                    clear_rows = game_field->scanField();
                 }
 
-                // Add standard score for cleared rows
-                score += clear_rows.size()*tutris::SCORE_INCREMENT_BASIC;
-                if (piece_fall_counter < 5)
+                // We failed to add a piece to the field.
+                // the piece spawns at the top of the field.
+                // if we failed to spawn a piece at the top due
+                // to collision, then the game is over.
+                if (!game_field->addPiece(tutris::tetromino_shape::random))
                 {
-                    piece_fall_counter += 1; // slow the active piece speed down
-                }
-
-
-                // Load text
-                score_str.str("");
-                score_str << "SCORE: ";
-                score_str << score;
-                SDL_Color color = {255, 255, 255, 255};
-                tex_img = SDL_Utils::renderText(score_str.str(),
-                    resource_path + "sample.ttf",
-                    color,
-                    24,
-                    renderer);
-
-                if ( tex_img == nullptr )
-                {
-                    SDL_Utils::cleanup(renderer, window);
-                    TTF_Quit();
-                    IMG_Quit();
-                    Mix_Quit();
-                    SDL_Quit();
-                    return 1;
-                }
-
-
-                // Re-Render screen with new rows marked for clearing
-                // Mark rows for clearing
-                game_field.markClearRows(clear_rows);
-                SDL_SetRenderDrawColor(renderer, tutris::COLOR_BACKGROUND.r, tutris::COLOR_BACKGROUND.g, tutris::COLOR_BACKGROUND.b, 0xFF);
-                SDL_RenderClear(renderer);
-                game_field.render(renderer);
-                SDL_Utils::renderTexture(tex_img, renderer, SCREEN_WIDTH/2 + (game_field.getNumCols()*tutris::BLOCK_SIZE_PIXEL)/2 + 10, SCREEN_HEIGHT/2 - (game_field.getNumRows()*tutris::BLOCK_SIZE_PIXEL)/2);
-                SDL_RenderPresent(renderer);
-
-                // Play sound effect
-                if (collapse)
-                {
-                    Mix_PlayChannel(-1, sfx_row_clear, 0);
+                    if (Mix_PlayingMusic() != 0)
+                    {
+                        Mix_HaltMusic();
+                    }
+                    Mix_PlayChannel(-1, sfx_gameover, 0);
+                    game_over = true;
+                    std::cout << "GAME OVER" << std::endl;
+                    std::cout << "SCORE: " << score << std::endl;
+                    SDL_Delay(3000);
+                    continue;
                 }
                 else
                 {
-                    Mix_PlayChannel(-1, sfx_collapse, 0);
+                    Mix_PlayChannel(-1, sfx_drop, 0);
                 }
-                
-
-                // Delay 0.5s to emphasize cleared rows
-                if (!clear_rows.empty())
-                {
-                    SDL_Delay(500);
-                }
-
-                // Remove marked rows from the field so blocks can fall
-                game_field.removeRows(clear_rows);
-
-                // Trigger collapse fall logic, or regular fall logic
-                // for the blocks in the field
-                if (collapse)
-                {
-                    game_field.collapseBlocks();
-                }
-                else
-                {
-                    game_field.shiftBlocks(clear_rows);
-                }
-                
-                // Redraw Screen
-                SDL_SetRenderDrawColor(renderer, tutris::COLOR_BACKGROUND.r, tutris::COLOR_BACKGROUND.g, tutris::COLOR_BACKGROUND.b, 0xFF);
-                SDL_RenderClear(renderer);
-                game_field.render(renderer);
-                SDL_Utils::renderTexture(tex_img, renderer, SCREEN_WIDTH/2 + (game_field.getNumCols()*tutris::BLOCK_SIZE_PIXEL)/2 + 10, SCREEN_HEIGHT/2 - (game_field.getNumRows()*tutris::BLOCK_SIZE_PIXEL)/2);
-                SDL_RenderPresent(renderer);
-
-                // All cleared rows now handled an put in place.
-                // Empty our list and scan field for more cleared
-                // rows now that blocks have fallen in place.
-                clear_rows.clear();
-                clear_rows = game_field.scanField();
             }
 
-            // We failed to add a piece to the field.
-            // the piece spawns at the top of the field.
-            // if we failed to spawn a piece at the top due
-            // to collision, then the game is over.
-            if (!game_field.addPiece(tutris::tetromino_shape::random))
+            if (force_down && game_field->isPieceActive())
             {
-                if (Mix_PlayingMusic() != 0)
-                {
-                    Mix_HaltMusic();
-                }
-                Mix_PlayChannel(-1, sfx_gameover, 0);
-                game_over = true;
-                std::cout << "GAME OVER" << std::endl;
-                std::cout << "SCORE: " << score << std::endl;
-                SDL_Delay(3000);
-                continue;
-            }
-            else
-            {
-                Mix_PlayChannel(-1, sfx_drop, 0);
+                game_field->movePiece(tutris::move_direction::down);
+                speed_counter = 0;
+                force_down = false;
             }
         }
 
-        if (force_down && game_field.isPieceActive())
-        {
-            game_field.movePiece(tutris::move_direction::down);
-            speed_counter = 0;
-            force_down = false;
-        }
-
-        // Redraw screen
+        // RENDER
+        // clear screen to background color
         SDL_SetRenderDrawColor(renderer, tutris::COLOR_BACKGROUND.r, tutris::COLOR_BACKGROUND.g, tutris::COLOR_BACKGROUND.b, 0xFF);
         SDL_RenderClear(renderer);
-        game_field.render(renderer);
-        SDL_Utils::renderTexture(tex_img, renderer, SCREEN_WIDTH/2 + (game_field.getNumCols()*tutris::BLOCK_SIZE_PIXEL)/2 + 10, SCREEN_HEIGHT/2 - (game_field.getNumRows()*tutris::BLOCK_SIZE_PIXEL)/2);
-        SDL_RenderPresent(renderer);
+
+        // Redraw game field
+        game_field->render(renderer);
+        int score_x_pos = SCREEN_WIDTH/2 + (game_field->getNumCols()*tutris::BLOCK_SIZE_PIXEL)/2 + 10;
+        int score_y_pos = SCREEN_HEIGHT/2 - (game_field->getNumRows()*tutris::BLOCK_SIZE_PIXEL)/2;
+        SDL_Utils::renderTexture(text_score, renderer,score_x_pos ,score_y_pos );
+
+        if (game_over)
+        {
+            // Draw box on center of screen
+            int box_width = game_field->getNumCols()*tutris::BLOCK_SIZE_PIXEL + 200;
+            int box_height = 200;
+            int box_x_pos = SCREEN_WIDTH/2 - (game_field->getNumCols()*tutris::BLOCK_SIZE_PIXEL)/2 - 100;
+            int box_y_pos = SCREEN_HEIGHT/2 - box_height/2;
+            SDL_Rect game_over_square = {
+                box_x_pos,
+                box_y_pos,
+                box_width,
+                box_height
+            };
+            SDL_SetRenderDrawColor( renderer, 0x00,0x00,0x00,0xFF);
+            SDL_RenderFillRect(renderer, &game_over_square);
+            SDL_SetRenderDrawColor( renderer, 0xFF,0xFF,0xFF,0xFF);
+            SDL_RenderDrawRect(renderer, &game_over_square);
+
+            // Draw GAME OVER text on top of box
+            text_game_over = SDL_Utils::renderText("GAME OVER",
+                resource_path + "sample.ttf",
+                color,
+                72,
+                renderer
+            );
+            if ( text_game_over == nullptr )
+            {
+                SDL_Utils::cleanup(renderer, window);
+                TTF_Quit();
+                IMG_Quit();
+                Mix_Quit();
+                SDL_Quit();
+                return 1;
+            }
+
+            text_end_prompt = SDL_Utils::renderText("Press ESC key to Quit",
+                resource_path + "sample.ttf",
+                color,
+                24,
+                renderer
+            );
+            if ( text_end_prompt == nullptr )
+            {
+                SDL_Utils::cleanup(renderer, window);
+                TTF_Quit();
+                IMG_Quit();
+                Mix_Quit();
+                SDL_Quit();
+                return 1;
+            }
+
+            text_end_prompt2 = SDL_Utils::renderText("Press SPACE key to start new game",
+                resource_path + "sample.ttf",
+                color,
+                24,
+                renderer
+            );
+            if ( text_end_prompt == nullptr )
+            {
+                SDL_Utils::cleanup(renderer, window);
+                TTF_Quit();
+                IMG_Quit();
+                Mix_Quit();
+                SDL_Quit();
+                return 1;
+            }
+
+            SDL_Utils::renderTexture(text_game_over, renderer, box_x_pos + 30, box_y_pos + 20);
+            SDL_Utils::renderTexture(text_end_prompt, renderer, box_x_pos + 30, box_y_pos + 100);
+            SDL_Utils::renderTexture(text_end_prompt2, renderer, box_x_pos + 30, box_y_pos + 140);
+        }
+         SDL_RenderPresent(renderer);
     }
 
     Mix_FreeChunk(sfx_drop);
