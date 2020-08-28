@@ -97,10 +97,7 @@ void Field::render(SDL_Renderer *renderer)
             tutris::BLOCK_SIZE_PIXEL
         };
 
-        // // Check cell type of block at this grid index
-
-
-
+        // Check cell type of block at this grid index
         if (m_grid[i].block_type == tutris::grid_cell_type::wall ||
             m_grid[i].block_type == tutris::grid_cell_type::piece ||
             m_grid[i].block_type == tutris::grid_cell_type::curr_piece ||
