@@ -79,6 +79,7 @@ namespace tutris
         unsigned int pos_x;
         unsigned int pos_y;
         block_color color;
+        block_color outline_color;
         unsigned int block_type;
         bool isActive;
 
@@ -95,13 +96,18 @@ namespace tutris
         {}
     } block;
 
-    const block_color COLOR_RED (0xFF, 0x00, 0x00);
-    const block_color COLOR_GREEN(0x00, 0xFF, 0x00);
-    const block_color COLOR_LIGHTBLUE(0x42, 0x53, 0xFF);
+    const block_color COLOR_RED (0xFF, 0x31, 0x31);
+    const block_color COLOR_DARKRED (0x71, 0x15, 0x15);
+    const block_color COLOR_GREEN(0x1C, 0xE0, 0x33);
+    const block_color COLOR_DARKGREEN(0x12, 0x61, 0x13);
+    const block_color COLOR_BLUE(0x3F, 0x39, 0xFF);
+    const block_color COLOR_DARKBLUE(0x15, 0x19, 0x71);
     const block_color COLOR_BLUEGREY(0xE3, 0xE6, 0xFF);
-    const block_color COLOR_BLUE(0x00, 0x14, 0x34);
-    const block_color COLOR_YELLOW(0xE4, 0xE8, 0x00);
+    //const block_color COLOR_BLUE(0x00, 0x14, 0x34);
+    const block_color COLOR_YELLOW(0xFB, 0xFF, 0x37);
+    const block_color COLOR_DARKYELLOW(0x5D, 0x60, 0x0E);
     const block_color COLOR_WHITE(0xFF, 0xFF, 0xFF);
+    const block_color COLOR_BLACK(0x00, 0x00, 0x00);
     const block_color COLOR_DARKGREY(0x5E, 0x5E, 0x5E);
     const block_color COLOR_LIGHTGREY(0x7D, 0x7D, 0x7D);
     const block_color COLOR_BACKGROUND(0x21, 0x21, 0x21);

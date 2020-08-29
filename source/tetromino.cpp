@@ -26,6 +26,7 @@ void Tetromino::setShape(tutris::tetromino_shape s, tutris::piece_color color)
     tutris::block p;
     p.block_type = tutris::grid_cell_type::curr_piece;
     int color_r, color_g, color_b;
+    int outline_color_r, outline_color_g, outline_color_b;
     switch (color)
     {
         case tutris::piece_color::piece_red:
@@ -33,13 +34,19 @@ void Tetromino::setShape(tutris::tetromino_shape s, tutris::piece_color color)
             color_r = tutris::COLOR_RED.r;
             color_g = tutris::COLOR_RED.g;
             color_b = tutris::COLOR_RED.b;
+            outline_color_r = tutris::COLOR_DARKRED.r;
+            outline_color_g = tutris::COLOR_DARKRED.g;
+            outline_color_b = tutris::COLOR_DARKRED.b;
             break;
         }
         case tutris::piece_color::piece_blue:
         {
-            color_r = tutris::COLOR_LIGHTBLUE.r;
-            color_g = tutris::COLOR_LIGHTBLUE.g;
-            color_b = tutris::COLOR_LIGHTBLUE.b;
+            color_r = tutris::COLOR_BLUE.r;
+            color_g = tutris::COLOR_BLUE.g;
+            color_b = tutris::COLOR_BLUE.b;
+            outline_color_r = tutris::COLOR_DARKBLUE.r;
+            outline_color_g = tutris::COLOR_DARKBLUE.g;
+            outline_color_b = tutris::COLOR_DARKBLUE.b;
             break;
         }
         case tutris::piece_color::piece_green:
@@ -47,6 +54,9 @@ void Tetromino::setShape(tutris::tetromino_shape s, tutris::piece_color color)
             color_r = tutris::COLOR_GREEN.r;
             color_g = tutris::COLOR_GREEN.g;
             color_b = tutris::COLOR_GREEN.b;
+            outline_color_r = tutris::COLOR_DARKGREEN.r;
+            outline_color_g = tutris::COLOR_DARKGREEN.g;
+            outline_color_b = tutris::COLOR_DARKGREEN.b;
             break;
         }
         case tutris::piece_color::piece_yellow:
@@ -54,21 +64,29 @@ void Tetromino::setShape(tutris::tetromino_shape s, tutris::piece_color color)
             color_r = tutris::COLOR_YELLOW.r;
             color_g = tutris::COLOR_YELLOW.g;
             color_b = tutris::COLOR_YELLOW.b;
+            outline_color_r = tutris::COLOR_DARKYELLOW.r;
+            outline_color_g = tutris::COLOR_DARKYELLOW.g;
+            outline_color_b = tutris::COLOR_DARKYELLOW.b;
             break;
         }
         case tutris::piece_color::piece_random:
             // intentional fall-through
+            // should never get this option
         default:
         {
             // Uh....we shouldn't get here...hopefully
             color_r = tutris::COLOR_WHITE.r;
             color_g = tutris::COLOR_WHITE.g;
             color_b = tutris::COLOR_WHITE.b;
+            outline_color_r = tutris::COLOR_BLACK.r;
+            outline_color_g = tutris::COLOR_BLACK.g;
+            outline_color_b = tutris::COLOR_BLACK.b;
             break;
         }
     }
 
     p.color = {color_r, color_g, color_b};
+    p.outline_color = {outline_color_r, outline_color_g, outline_color_b};
 
     tutris::block o;
     o.block_type = tutris::grid_cell_type::empty;

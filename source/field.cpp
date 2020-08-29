@@ -105,7 +105,7 @@ void Field::render(SDL_Renderer *renderer)
         {
             SDL_SetRenderDrawColor( renderer, m_grid[i].color.r,m_grid[i].color.g,m_grid[i].color.b,0xFF);
             SDL_RenderFillRect(renderer, &field_square);
-            SDL_SetRenderDrawColor( renderer, 0x00,0x00,0x00,0xFF);
+            SDL_SetRenderDrawColor( renderer, m_grid[i].outline_color.r, m_grid[i].outline_color.g, m_grid[i].outline_color.b, 0xFF);
             SDL_RenderDrawRect(renderer, &field_square);
         }
         else if (m_grid[i].block_type == tutris::grid_cell_type::empty)
