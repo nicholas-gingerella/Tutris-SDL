@@ -11,13 +11,13 @@ BIN_DIR = ../bin
 EXE = Tutris
 
 # Tutris Includes
-_TUTRIS_INCLUDES = field.h tetromino.h tutris.h
+_TUTRIS_INCLUDES = Game.h Piece.h tutris.h
 TUTRIS_INCLUDES = $(patsubst %,$(TUTRIS_INCLUDES_DIR)/%,$(_TUTRIS_INCLUDES))
 
 _UTIL_INCLUDES = SDL_Utils.h
 UTILS_INCLUDE = $(patsubst %,$(UTILS_INCLUDE_DIR)/%,$(_UTIL_INCLUDES))
 
-_OBJS = main.o field.o tetromino.o 
+_OBJS = main.o Game.o Piece.o 
 OBJS = $(patsubst %,$(OBJ_DIR)/%,$(_OBJS))
 
 $(OBJ_DIR)/%.o: %.cpp $(UTILS_INCLUDE) $(TUTRIS_INCLUDES)

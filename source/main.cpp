@@ -6,6 +6,7 @@
 //   SDL 2.0
 
 #include <iostream>
+#include <iomanip>
 #include <algorithm>
 #include <string>
 #include <sstream>
@@ -16,12 +17,13 @@
 #include <SDL2/SDL_mixer.h>
 #include <SDL2/SDL_ttf.h>
 #include "my_utils/SDL_Utils.h"
-#include "tutris/field.h"
-#include "tutris/tetromino.h"
+#include "tutris/Game.h"
+#include "tutris/Piece.h"
 #include "tutris/tutris.h"
 
 void display_game_over_prompt(SDL_Renderer* rend);
 void display_title_prompt(SDL_Renderer* rend);
+std::string get_countdown_timer(unsigned int elapsed_time_ms);
 
 const int SCREEN_WIDTH = 1024;
 const int SCREEN_HEIGHT = 728;
@@ -33,13 +35,16 @@ const std::string WINDOW_TITLE = "Tutris";
 SDL_Window *window = nullptr;
 SDL_Renderer *renderer = nullptr;
 std::stringstream score_str;
+std::string game_timer_str;
 Mix_Music *bgm_game = nullptr;
 Mix_Chunk *sfx_drop = nullptr;
 Mix_Chunk *sfx_collapse = nullptr;
 Mix_Chunk *sfx_row_clear = nullptr;
 Mix_Chunk *sfx_gameover = nullptr;
+Mix_Chunk *sfx_victory = nullptr;
 const std::string resource_path = "../resources/fonts/";
 SDL_Texture *text_score;
+SDL_Texture *text_timer;
 SDL_Texture *text_title;
 SDL_Texture *text_title_prompt_start;
 SDL_Texture *text_game_over;
@@ -135,6 +140,7 @@ int main(int argc, char **argv)
         SDL_Utils::cleanup(window);
         SDL_Quit();
     }
+
     sfx_gameover = Mix_LoadWAV("../resources/sounds/gameover.wav");
     if (sfx_gameover == nullptr)
     {
@@ -142,6 +148,14 @@ int main(int argc, char **argv)
         SDL_Utils::cleanup(window);
         SDL_Quit();
     }
+
+    // sfx_victory = Mix_LoadWAV("../resources/sounds/victory.wav");
+    // if (sfx_victory == nullptr)
+    // {
+    //     std::cout << Mix_GetError() << std::endl;
+    //     SDL_Utils::cleanup(window);
+    //     SDL_Quit();
+    // }
 
     // Load Text
     text_game_over = SDL_Utils::renderText("GAME OVER",
@@ -234,7 +248,7 @@ int main(int argc, char **argv)
     // Seed random generator
     srand(static_cast<unsigned>(time(NULL)));
 
-    Field* game_field = new Field(SCREEN_WIDTH/2 - ((tutris::FIELD_WIDTH/2)*tutris::BLOCK_SIZE_PIXEL), 100, tutris::FIELD_WIDTH, tutris::FIELD_HEIGHT);
+    Game* game_instance = new Game(SCREEN_WIDTH/2 - ((ns_Tutris::FIELD_WIDTH/2)*ns_Tutris::BLOCK_SIZE_PIXEL), 100, ns_Tutris::FIELD_WIDTH, ns_Tutris::FIELD_HEIGHT);
     unsigned int piece_fall_counter = 5; // The lower the number, the faster the speed
     unsigned int speed_counter = 0;
     unsigned int elapsed_ms = 0;
@@ -263,13 +277,39 @@ int main(int argc, char **argv)
         // Super simple, just sleep 50ms per step (20 steps per second)
         SDL_Delay(50);
         elapsed_ms += 50;
+        
+        std::string timer = get_countdown_timer(elapsed_ms);
+        text_timer = SDL_Utils::renderText(timer,
+            resource_path + "sample.ttf",
+            COLOR_WHITE,
+            24,
+            renderer
+        );
+
         if ((elapsed_ms >= max_speed_lock) && (piece_fall_counter > 2))
         {
             piece_fall_counter = 2; // make the game a bit more interesting
         }
-        else if ((elapsed_ms >= 2*max_speed_lock))
+        else if ( !game_over && !on_title_screen && (elapsed_ms >= ns_Tutris::MAX_TIME_MS))
         {
-            piece_fall_counter = 1; // time to wrap this game up -__-
+            // end game
+            // maybe play a victory song instead!
+            game_over = true;
+
+            if (Mix_PlayingMusic() != 0)
+            {
+                Mix_HaltMusic();
+            }
+
+            if (Mix_Playing(-1) != 0)
+            {
+                Mix_HaltChannel(-1);
+            }
+
+            Mix_PlayChannel(-1, sfx_gameover, 0);
+            game_over = true;
+            std::cout << "NICE GAME!" << std::endl;
+            std::cout << "SCORE: " << score << std::endl;
         }
 
         // update speed as long as game is still in progress
@@ -305,25 +345,25 @@ int main(int argc, char **argv)
                     case SDLK_LEFT:
                         if (!game_over)
                         {
-                            game_field->movePiece(tutris::move_direction::left);
+                            game_instance->movePiece(ns_Tutris::move_direction::left);
                         }
                         break;
                     case SDLK_RIGHT:
                         if (!game_over)
                         {
-                            game_field->movePiece(tutris::move_direction::right);
+                            game_instance->movePiece(ns_Tutris::move_direction::right);
                         }
                         break;
                     case SDLK_DOWN:
                         if (!game_over)
                         {
-                            game_field->movePiece(tutris::move_direction::down);
+                            game_instance->movePiece(ns_Tutris::move_direction::down);
                         }
                         break;
                     case SDLK_UP:
                         if (!game_over)
                         {
-                            game_field->rotatePiece();
+                            game_instance->rotatePiece();
                         }
                         break;
                     case SDLK_ESCAPE:
@@ -336,8 +376,9 @@ int main(int argc, char **argv)
                         if (game_over)
                         {
                             game_over = false;
-                            delete game_field;
-                            game_field = new Field(SCREEN_WIDTH/2 - ((tutris::FIELD_WIDTH/2)*tutris::BLOCK_SIZE_PIXEL), 100, tutris::FIELD_WIDTH, tutris::FIELD_HEIGHT);
+                            delete game_instance;
+                            game_instance = new Game(SCREEN_WIDTH/2 - ((ns_Tutris::FIELD_WIDTH/2)*ns_Tutris::BLOCK_SIZE_PIXEL), 100, ns_Tutris::FIELD_WIDTH, ns_Tutris::FIELD_HEIGHT);
+                            elapsed_ms = 0;
                             score = 0;
                             score_str.str("");
                             score_str << "SCORE: ";
@@ -367,7 +408,13 @@ int main(int argc, char **argv)
                         else if (on_title_screen)
                         {
                             on_title_screen = false;
+                            elapsed_ms = 0;
                         }
+                        else
+                        {
+                            // in middle of game. Use ESC to pause game
+                        }
+                        
                         break;
                     default:
                         break;
@@ -385,12 +432,12 @@ int main(int argc, char **argv)
                 Mix_PlayMusic(bgm_game, -1);
             }
 
-            if (!game_field->isPieceActive())
+            if (!game_instance->isPieceActive())
             {
                 // We are either at the very start of the game, or the current
                 // piece has been set in place. Are there any full lines of blocks
                 // that we can clear and award points for?
-                std::vector<int> clear_rows = game_field->scanField();
+                std::vector<int> clear_rows = game_instance->scanField();
                 while (!clear_rows.empty())
                 {   
                     // Check the number of neighboring cleared rows
@@ -419,7 +466,7 @@ int main(int argc, char **argv)
                     // Give player a bonus if they triggered a collapse
                     if (collapse)
                     {
-                        score += tutris::SCORE_INCREMENT_COLLAPSE;
+                        score += ns_Tutris::SCORE_INCREMENT_COLLAPSE;
                         if (piece_fall_counter < 5)
                         {
                             piece_fall_counter += 1; // slow the active piece speed down
@@ -427,7 +474,7 @@ int main(int argc, char **argv)
                     }
 
                     // Add standard score for cleared rows
-                    score += clear_rows.size()*tutris::SCORE_INCREMENT_BASIC;
+                    score += clear_rows.size()*ns_Tutris::SCORE_INCREMENT_BASIC;
                     if (piece_fall_counter < 5)
                     {
                         piece_fall_counter += 1; // slow the active piece speed down
@@ -457,11 +504,11 @@ int main(int argc, char **argv)
 
                     // Re-Render screen with new rows marked for clearing
                     // Mark rows for clearing
-                    game_field->markClearRows(clear_rows);
-                    SDL_SetRenderDrawColor(renderer, tutris::COLOR_BACKGROUND.r, tutris::COLOR_BACKGROUND.g, tutris::COLOR_BACKGROUND.b, 0xFF);
+                    game_instance->markClearRows(clear_rows);
+                    SDL_SetRenderDrawColor(renderer, ns_Tutris::COLOR_BACKGROUND.r, ns_Tutris::COLOR_BACKGROUND.g, ns_Tutris::COLOR_BACKGROUND.b, 0xFF);
                     SDL_RenderClear(renderer);
-                    game_field->render(renderer);
-                    SDL_Utils::renderTexture(text_score, renderer, SCREEN_WIDTH/2 + (game_field->getNumCols()*tutris::BLOCK_SIZE_PIXEL)/2 + 10, SCREEN_HEIGHT/2 - (game_field->getNumRows()*tutris::BLOCK_SIZE_PIXEL)/2);
+                    game_instance->render(renderer);
+                    SDL_Utils::renderTexture(text_score, renderer, SCREEN_WIDTH/2 + (game_instance->getNumCols()*ns_Tutris::BLOCK_SIZE_PIXEL)/2 + 10, SCREEN_HEIGHT/2 - (game_instance->getNumRows()*ns_Tutris::BLOCK_SIZE_PIXEL)/2);
                     SDL_RenderPresent(renderer);
 
                     // Play sound effect
@@ -482,48 +529,55 @@ int main(int argc, char **argv)
                     }
 
                     // Remove marked rows from the field so blocks can fall
-                    game_field->removeRows(clear_rows);
+                    game_instance->removeRows(clear_rows);
 
                     // Trigger collapse fall logic, or regular fall logic
                     // for the blocks in the field
                     if (collapse)
                     {
-                        game_field->collapseBlocks();
+                        game_instance->collapseBlocks();
                     }
                     else
                     {
-                        game_field->shiftBlocks(clear_rows);
+                        game_instance->shiftBlocks(clear_rows);
                     }
                     
                     // Redraw Screen
-                    SDL_SetRenderDrawColor(renderer, tutris::COLOR_BACKGROUND.r, tutris::COLOR_BACKGROUND.g, tutris::COLOR_BACKGROUND.b, 0xFF);
+                    SDL_SetRenderDrawColor(renderer, ns_Tutris::COLOR_BACKGROUND.r, ns_Tutris::COLOR_BACKGROUND.g, ns_Tutris::COLOR_BACKGROUND.b, 0xFF);
                     SDL_RenderClear(renderer);
-                    game_field->render(renderer);
-                    SDL_Utils::renderTexture(text_score, renderer, SCREEN_WIDTH/2 + (game_field->getNumCols()*tutris::BLOCK_SIZE_PIXEL)/2 + 10, SCREEN_HEIGHT/2 - (game_field->getNumRows()*tutris::BLOCK_SIZE_PIXEL)/2);
+                    game_instance->render(renderer);
+                    SDL_Utils::renderTexture(text_score, renderer, SCREEN_WIDTH/2 + (game_instance->getNumCols()*ns_Tutris::BLOCK_SIZE_PIXEL)/2 + 10, SCREEN_HEIGHT/2 - (game_instance->getNumRows()*ns_Tutris::BLOCK_SIZE_PIXEL)/2);
                     SDL_RenderPresent(renderer);
 
                     // All cleared rows now handled an put in place.
                     // Empty our list and scan field for more cleared
                     // rows now that blocks have fallen in place.
                     clear_rows.clear();
-                    clear_rows = game_field->scanField();
+                    clear_rows = game_instance->scanField();
                 }
 
                 // We failed to add a piece to the field.
                 // the piece spawns at the top of the field.
                 // if we failed to spawn a piece at the top due
                 // to collision, then the game is over.
-                if (!game_field->addPiece(tutris::tetromino_shape::random))
+                if (!game_instance->addPiece(ns_Tutris::tetromino_shape::random))
                 {
+                    // stop all music
                     if (Mix_PlayingMusic() != 0)
                     {
                         Mix_HaltMusic();
                     }
+
+                    // stop all sound effects
+                    if (Mix_Playing(-1) != 0)
+                    {
+                        Mix_HaltChannel(-1);
+                    }
+
                     Mix_PlayChannel(-1, sfx_gameover, 0);
                     game_over = true;
                     std::cout << "GAME OVER" << std::endl;
                     std::cout << "SCORE: " << score << std::endl;
-                    // SDL_Delay(3000);
                     continue;
                 }
                 else
@@ -532,9 +586,9 @@ int main(int argc, char **argv)
                 }
             }
 
-            if (force_down && game_field->isPieceActive())
+            if (force_down && game_instance->isPieceActive())
             {
-                game_field->movePiece(tutris::move_direction::down);
+                game_instance->movePiece(ns_Tutris::move_direction::down);
                 speed_counter = 0;
                 force_down = false;
             }
@@ -542,16 +596,17 @@ int main(int argc, char **argv)
 
         // RENDER
         // clear screen to background color
-        SDL_SetRenderDrawColor(renderer, tutris::COLOR_BACKGROUND.r, tutris::COLOR_BACKGROUND.g, tutris::COLOR_BACKGROUND.b, 0xFF);
+        SDL_SetRenderDrawColor(renderer, ns_Tutris::COLOR_BACKGROUND.r, ns_Tutris::COLOR_BACKGROUND.g, ns_Tutris::COLOR_BACKGROUND.b, 0xFF);
         SDL_RenderClear(renderer);
 
         // Redraw game field
         if (!on_title_screen)
         {
-            game_field->render(renderer);
-            int score_x_pos = SCREEN_WIDTH/2 + (game_field->getNumCols()*tutris::BLOCK_SIZE_PIXEL)/2 + 10;
-            int score_y_pos = SCREEN_HEIGHT/2 - (game_field->getNumRows()*tutris::BLOCK_SIZE_PIXEL)/2;
+            game_instance->render(renderer);
+            int score_x_pos = SCREEN_WIDTH/2 + (game_instance->getNumCols()*ns_Tutris::BLOCK_SIZE_PIXEL)/2 + 10;
+            int score_y_pos = SCREEN_HEIGHT/2 - (game_instance->getNumRows()*ns_Tutris::BLOCK_SIZE_PIXEL)/2;
             SDL_Utils::renderTexture(text_score, renderer,score_x_pos ,score_y_pos );
+            SDL_Utils::renderTexture(text_timer, renderer,score_x_pos ,score_y_pos + 20 );
         }
 
         if (game_over)
@@ -583,9 +638,9 @@ int main(int argc, char **argv)
 void display_game_over_prompt(SDL_Renderer* rend)
 {
     // Draw box on center of screen
-    int box_width = tutris::FIELD_WIDTH*tutris::BLOCK_SIZE_PIXEL + 200;
+    int box_width = ns_Tutris::FIELD_WIDTH*ns_Tutris::BLOCK_SIZE_PIXEL + 200;
     int box_height = 200;
-    int box_x_pos = SCREEN_WIDTH/2 - (tutris::FIELD_WIDTH*tutris::BLOCK_SIZE_PIXEL)/2 - 100;
+    int box_x_pos = SCREEN_WIDTH/2 - (ns_Tutris::FIELD_WIDTH*ns_Tutris::BLOCK_SIZE_PIXEL)/2 - 100;
     int box_y_pos = SCREEN_HEIGHT/2 - box_height/2;
     SDL_Rect game_over_square = {
         box_x_pos,
@@ -606,9 +661,9 @@ void display_game_over_prompt(SDL_Renderer* rend)
 void display_title_prompt(SDL_Renderer* rend)
 {
     // Draw box on center of screen
-    int box_width = tutris::FIELD_WIDTH*tutris::BLOCK_SIZE_PIXEL + 200;
+    int box_width = ns_Tutris::FIELD_WIDTH*ns_Tutris::BLOCK_SIZE_PIXEL + 200;
     int box_height = 200;
-    int box_x_pos = SCREEN_WIDTH/2 - (tutris::FIELD_WIDTH*tutris::BLOCK_SIZE_PIXEL)/2 - 100;
+    int box_x_pos = SCREEN_WIDTH/2 - (ns_Tutris::FIELD_WIDTH*ns_Tutris::BLOCK_SIZE_PIXEL)/2 - 100;
     int box_y_pos = SCREEN_HEIGHT/2 - box_height/2;
     SDL_Rect game_over_square = {
         box_x_pos,
@@ -623,4 +678,28 @@ void display_title_prompt(SDL_Renderer* rend)
 
     SDL_Utils::renderTexture(text_title, rend, box_x_pos + 110, box_y_pos + 20);
     SDL_Utils::renderTexture(text_title_prompt_start, rend, box_x_pos + 95, box_y_pos + 120);
+}
+
+std::string get_countdown_timer(unsigned int elapsed_time_ms)
+{
+    unsigned int max_ms_countdown;
+    if ((elapsed_time_ms >= 0) && (elapsed_time_ms <= ns_Tutris::MAX_TIME_MS))
+    {
+        max_ms_countdown = (ns_Tutris::MAX_TIME_MS) - elapsed_time_ms;
+    }
+    else
+    {
+        max_ms_countdown = 0;
+    }
+    
+    unsigned int num_secs = (max_ms_countdown/1000);
+    unsigned int num_mins = num_secs/60;
+    unsigned int num_secs_display = num_secs % 60; // only want to display 0-60 seconds 
+
+    std::stringstream mins_string;
+    mins_string << std::setfill('0') << std::setw(2) << num_mins; 
+    std::stringstream secs_string;
+    secs_string << std::setfill('0') << std::setw(2) << num_secs_display;  
+
+    return std::string(mins_string.str() + ":" + secs_string.str());
 }

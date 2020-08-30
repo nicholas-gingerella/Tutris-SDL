@@ -3,20 +3,19 @@
 #include <algorithm>
 #include <vector>
 #include "tutris/tutris.h"
-class Field
+class Game
 {
 public:
-    Field();
-    Field(int x, int y, int cols, int rows);
-    ~Field();
+    Game();
+    Game(int x, int y, int cols, int rows);
+    ~Game();
     void render(SDL_Renderer *renderer);
     bool isFilled();
     void printField();
-    bool addPiece(tutris::tetromino_shape piece);
-    void movePiece(tutris::move_direction dir);
+    bool addPiece(ns_Tutris::tetromino_shape piece);
+    void movePiece(ns_Tutris::move_direction dir);
     void rotatePiece();
     bool isPieceActive();
-    // bool moveBlock(int start_pos_x, int start_pos_y, int end_pos_x, int end_pos_y);
     unsigned int getNumGridCells();
     unsigned int getNumRows();
     unsigned int getNumCols();
@@ -25,7 +24,7 @@ public:
     void removeRows(std::vector<int> clear_rows);
     void collapseBlocks();
     void shiftBlocks(std::vector<int> rows);
-    bool moveBlock(int grid_index, tutris::move_direction dir, int num_moves = 1);
+    bool moveBlock(int grid_index, ns_Tutris::move_direction dir, int num_moves = 1);
 
 
 private:
@@ -38,7 +37,8 @@ private:
     int m_piece_pos_y;
     bool m_piece_active;
     int m_current_piece_rotation;
-    std::vector<tutris::block> m_piece_shape;
-    tutris::block* m_grid;
+    std::vector<ns_Tutris::block> m_piece_shape;
+    ns_Tutris::block* m_grid;
+    unsigned int m_time_remaining_ms;
 };
 #endif
