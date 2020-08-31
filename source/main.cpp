@@ -54,7 +54,6 @@ SDL_Texture *text_end_prompt2;
 SDL_Color COLOR_WHITE = {255, 255, 255, 255};
 
 
-// formerly in main()
 Game* game_instance = new Game(SCREEN_WIDTH/2 - ((ns_Tutris::FIELD_WIDTH/2)*ns_Tutris::BLOCK_SIZE_PIXEL), 100, ns_Tutris::FIELD_WIDTH, ns_Tutris::FIELD_HEIGHT);
 unsigned int piece_fall_counter = 5; // The lower the number, the faster the speed
 unsigned int speed_counter = 0;
@@ -265,30 +264,14 @@ int main(int argc, char **argv)
         SDL_Quit();
         return 1;
     }
-
     ///////////////////////////////
     // END SDL Setup Boilerplate
     ///////////////////////////////
 
 
     // PROGRAM LOGIC STARTS HERE
-
     // Seed random generator
     srand(static_cast<unsigned>(time(NULL)));
-
-    // Game* game_instance = new Game(SCREEN_WIDTH/2 - ((ns_Tutris::FIELD_WIDTH/2)*ns_Tutris::BLOCK_SIZE_PIXEL), 100, ns_Tutris::FIELD_WIDTH, ns_Tutris::FIELD_HEIGHT);
-    // unsigned int piece_fall_counter = 5; // The lower the number, the faster the speed
-    // unsigned int speed_counter = 0;
-    // unsigned int elapsed_ms = 0;
-    // unsigned int max_speed_lock = 5*(60*1000); // used to max out speed if game is going on too long (5 mins)
-    // unsigned int speed_up_interval = 30*1000; // speed up piece every 30s
-    // bool force_down = false;
-    // SDL_Event event;
-    // bool game_running = true;
-    // bool game_over = false;
-    // bool game_paused = false;
-    // bool game_victory = false;
-    // unsigned int score = 0;
 
     score_str.str("");
     score_str << "SCORE: ";
@@ -299,19 +282,7 @@ int main(int argc, char **argv)
         24,
         renderer);
 
-    // enum class game_state
-    // {
-    //     title,
-    //     playing,
-    //     paused,
-    //     gameover,
-    //     victory
-    // };
-
-    // game_state tutris_state = game_state::title;
-
     // Game loop
-    // bool on_title_screen = true;
     while (game_running)
     {
         // Time Step
@@ -352,6 +323,7 @@ int main(int argc, char **argv)
                     // (this will stop ALL channels)
                     if (Mix_Playing(-1) != 0)
                     {
+                        std::cout << "halt all sound" << std::endl;
                         Mix_HaltChannel(-1);
                     }
 
@@ -375,16 +347,20 @@ int main(int argc, char **argv)
                     // stop all music
                     if (Mix_PlayingMusic() != 0)
                     {
+                        std::cout <<  "Halt music" << std::endl;
                         Mix_HaltMusic();
                     }
 
                     // stop all sound effects
                     if (Mix_Playing(-1) != 0)
                     {
+                        std::cout << "Halt sound" << std::endl;
                         Mix_HaltChannel(-1);
                     }
 
+                    // Play game over sound
                     Mix_PlayChannel(-1, sfx_gameover, 0);
+
                     std::cout << "GAME OVER" << std::endl;
                     std::cout << "SCORE: " << score << std::endl;
 
@@ -409,8 +385,9 @@ int main(int argc, char **argv)
                         Mix_HaltChannel(-1);
                     }
 
-                    // Play victory sound and dispaly victory message
+                    // Play victory sound and display victory message
                     Mix_PlayChannel(-1, sfx_gameover, 0);
+
                     std::cout << "NICE GAME!" << std::endl;
                     std::cout << "SCORE: " << score << std::endl;
 
@@ -478,6 +455,7 @@ int main(int argc, char **argv)
                         // (this will stop ALL channels)
                         if (Mix_Playing(-1) != 0)
                         {
+                            std::cout << "Halt all sound" << std::endl;
                             Mix_HaltChannel(-1);
                         }
 
@@ -558,7 +536,7 @@ int main(int argc, char **argv)
             }
             case game_state::playing:
             {
-                // update game time loop
+                // Update game loop
                 game_update(renderer);
 
                 game_instance->render(renderer);
@@ -678,9 +656,6 @@ int main(int argc, char **argv)
             }
         }
 
-        // Game logic
-        // game_update(renderer);
-
         // RENDER
         // Render Screen
         SDL_RenderPresent(renderer);
@@ -692,11 +667,12 @@ int main(int argc, char **argv)
 
     std::cout << "Ending game" << std::endl;
 
+    // Freezing when exiting for some reason
     // Mix_FreeChunk(sfx_drop);
     // Mix_FreeChunk(sfx_collapse);
     // Mix_FreeChunk(sfx_row_clear);
     // SDL_Utils::cleanup(renderer, window);
-    // Mix_Quit();
+    // /Mix_Quit();
     // IMG_Quit();
     // TTF_Quit();
     // SDL_Quit();
