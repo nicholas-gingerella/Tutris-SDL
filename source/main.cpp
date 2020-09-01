@@ -21,10 +21,11 @@
 #include "tutris/Piece.h"
 #include "tutris/tutris.h"
 
-void display_game_over_prompt(SDL_Renderer* rend);
-void display_title_prompt(SDL_Renderer* rend);
-std::string get_countdown_timer(unsigned int elapsed_time_ms);
-void game_update(SDL_Renderer* renderer);
+void display_game_over_prompt(SDL_Renderer*);
+void display_title_prompt(SDL_Renderer*);
+std::string get_countdown_timer(unsigned int);
+void game_update(SDL_Renderer*);
+void display_Pause_prompt(SDL_Renderer*);
 
 const int SCREEN_WIDTH = 1024;
 const int SCREEN_HEIGHT = 728;
@@ -39,6 +40,8 @@ std::stringstream score_str;
 std::string game_timer_str;
 Mix_Music *bgm_game = nullptr;
 Mix_Chunk *sfx_drop = nullptr;
+Mix_Chunk *sfx_pause_on = nullptr;
+Mix_Chunk *sfx_pause_off = nullptr;
 Mix_Chunk *sfx_collapse = nullptr;
 Mix_Chunk *sfx_row_clear = nullptr;
 Mix_Chunk *sfx_gameover = nullptr;
@@ -51,6 +54,7 @@ SDL_Texture *text_title_prompt_start;
 SDL_Texture *text_game_over;
 SDL_Texture *text_end_prompt;
 SDL_Texture *text_end_prompt2;
+SDL_Texture *text_pause;
 SDL_Color COLOR_WHITE = {255, 255, 255, 255};
 
 
@@ -176,6 +180,22 @@ int main(int argc, char **argv)
         SDL_Quit();
     }
 
+    sfx_pause_on = Mix_LoadWAV("../resources/sounds/pause_on.wav");
+    if (sfx_pause_on == nullptr)
+    {
+        std::cout << Mix_GetError() << std::endl;
+        SDL_Utils::cleanup(window);
+        SDL_Quit();
+    }
+
+    sfx_pause_off = Mix_LoadWAV("../resources/sounds/pause_off.wav");
+    if (sfx_pause_off == nullptr)
+    {
+        std::cout << Mix_GetError() << std::endl;
+        SDL_Utils::cleanup(window);
+        SDL_Quit();
+    }
+
     // sfx_victory = Mix_LoadWAV("../resources/sounds/victory.wav");
     // if (sfx_victory == nullptr)
     // {
@@ -260,6 +280,23 @@ int main(int argc, char **argv)
     renderer
     );
     if ( text_title_prompt_start == nullptr )
+    {
+        std::cout << "Error loading START text" << std::endl;
+        SDL_Utils::cleanup(renderer, window);
+        TTF_Quit();
+        IMG_Quit();
+        Mix_Quit();
+        SDL_Quit();
+        return 1;
+    }
+
+    text_pause = SDL_Utils::renderText("PAUSED",
+    resource_path + "sample.ttf",
+    COLOR_WHITE,
+    72,
+    renderer
+    );
+    if ( text_pause == nullptr )
     {
         std::cout << "Error loading START text" << std::endl;
         SDL_Utils::cleanup(renderer, window);
@@ -393,11 +430,8 @@ int main(int argc, char **argv)
                 {
                     tutris_state = game_state::paused;
                     
-                    // stop all game update logic
                     // play pause sound
-
-                    // lower music volume
-                    Mix_Volume(-1, MIX_MAX_VOLUME/2);
+                    Mix_PlayChannel(-1, sfx_pause_on, 0);
 
                     // display pause screen ( in action control)
                 }
@@ -413,8 +447,7 @@ int main(int argc, char **argv)
                 {
                     tutris_state = game_state::playing;
                     
-                    // Raise music volume
-                    Mix_Volume(-1, MIX_MAX_VOLUME);
+                    Mix_PlayChannel(-1, sfx_pause_off, 0);
                 }
                 else
                 {
@@ -478,7 +511,6 @@ int main(int argc, char **argv)
                     if (game_running)
                     {
                         tutris_state = game_state::playing;
-                        std::cout << "transition gameover -> playing" << std::endl;
 
                         // cleanup current game instance and create a new one
                         delete game_instance;
@@ -553,6 +585,7 @@ int main(int argc, char **argv)
                 SDL_Utils::renderTexture(text_timer, renderer,score_x_pos ,score_y_pos + 20 );
 
                 // display pause screen
+                display_Pause_prompt(renderer);
                 break;
             }
             case game_state::victory:
@@ -752,9 +785,10 @@ void game_update(SDL_Renderer* rend)
             if (collapse)
             {
                 score += (ns_Tutris::SCORE_INCREMENT_COLLAPSE * neighbor_rows);
-                if (piece_fall_counter < 5)
+                if ((piece_fall_counter < 5) && (elapsed_ms < max_speed_lock))
                 {
-                    piece_fall_counter += 1; // slow the active piece speed down
+                    // slow down piece, unless we're halfway through the match
+                    piece_fall_counter += 1;
                 }
             }
 
@@ -905,6 +939,27 @@ void display_title_prompt(SDL_Renderer* rend)
 
     SDL_Utils::renderTexture(text_title, rend, box_x_pos + 110, box_y_pos + 20);
     SDL_Utils::renderTexture(text_title_prompt_start, rend, box_x_pos + 95, box_y_pos + 120);
+}
+
+void display_Pause_prompt(SDL_Renderer* rend)
+{
+    // Draw box on center of screen
+    int box_width = ns_Tutris::FIELD_WIDTH*ns_Tutris::BLOCK_SIZE_PIXEL + 200;
+    int box_height = 200;
+    int box_x_pos = SCREEN_WIDTH/2 - (ns_Tutris::FIELD_WIDTH*ns_Tutris::BLOCK_SIZE_PIXEL)/2 - 100;
+    int box_y_pos = SCREEN_HEIGHT/2 - box_height/2;
+    SDL_Rect game_over_square = {
+        box_x_pos,
+        box_y_pos,
+        box_width,
+        box_height
+    };
+    SDL_SetRenderDrawColor( rend, 0x00,0x00,0x00,0xFF);
+    SDL_RenderFillRect(rend, &game_over_square);
+    SDL_SetRenderDrawColor( rend, 0xFF,0xFF,0xFF,0xFF);
+    SDL_RenderDrawRect(rend, &game_over_square);
+
+    SDL_Utils::renderTexture(text_pause, rend, box_x_pos + 100, box_y_pos + 70);
 }
 
 std::string get_countdown_timer(unsigned int elapsed_time_ms)
