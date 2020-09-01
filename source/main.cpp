@@ -22,10 +22,11 @@
 #include "tutris/tutris.h"
 
 void display_game_over_prompt(SDL_Renderer*);
+void display_victory_prompt(SDL_Renderer*);
 void display_title_prompt(SDL_Renderer*);
+void display_Pause_prompt(SDL_Renderer*);
 std::string get_countdown_timer(unsigned int);
 void game_update(SDL_Renderer*);
-void display_Pause_prompt(SDL_Renderer*);
 
 const int SCREEN_WIDTH = 1024;
 const int SCREEN_HEIGHT = 728;
@@ -55,6 +56,7 @@ SDL_Texture *text_game_over;
 SDL_Texture *text_end_prompt;
 SDL_Texture *text_end_prompt2;
 SDL_Texture *text_pause;
+SDL_Texture *text_victory;
 SDL_Color COLOR_WHITE = {255, 255, 255, 255};
 
 
@@ -214,6 +216,23 @@ int main(int argc, char **argv)
     if ( text_game_over == nullptr )
     {
         std::cout << "Error loading GAME OVER text" << std::endl;
+        SDL_Utils::cleanup(renderer, window);
+        TTF_Quit();
+        IMG_Quit();
+        Mix_Quit();
+        SDL_Quit();
+        return 1;
+    }
+
+    text_victory = SDL_Utils::renderText("NICE GAME!",
+        resource_path + "sample.ttf",
+        COLOR_WHITE,
+        72,
+        renderer
+    );
+    if ( text_game_over == nullptr )
+    {
+        std::cout << "Error loading Victory text" << std::endl;
         SDL_Utils::cleanup(renderer, window);
         TTF_Quit();
         IMG_Quit();
@@ -590,8 +609,16 @@ int main(int argc, char **argv)
             }
             case game_state::victory:
             {
+                // Want to keep the game field rendered
+                // and show the game over screen on top of field
+                game_instance->render(renderer);
+                int score_x_pos = SCREEN_WIDTH/2 + (game_instance->getNumCols()*ns_Tutris::BLOCK_SIZE_PIXEL)/2 + 10;
+                int score_y_pos = SCREEN_HEIGHT/2 - (game_instance->getNumRows()*ns_Tutris::BLOCK_SIZE_PIXEL)/2;
+                SDL_Utils::renderTexture(text_score, renderer,score_x_pos ,score_y_pos );
+                SDL_Utils::renderTexture(text_timer, renderer,score_x_pos ,score_y_pos + 20 );
+                
                 // display victory screen
-                display_game_over_prompt(renderer);
+                display_victory_prompt(renderer);
                 break;
             }
             case game_state::gameover:
@@ -915,6 +942,30 @@ void display_game_over_prompt(SDL_Renderer* rend)
     SDL_RenderDrawRect(rend, &game_over_square);
 
     SDL_Utils::renderTexture(text_game_over, rend, box_x_pos + 30, box_y_pos + 20);
+    SDL_Utils::renderTexture(text_end_prompt, rend, box_x_pos + 30, box_y_pos + 100);
+    SDL_Utils::renderTexture(text_end_prompt2, rend, box_x_pos + 30, box_y_pos + 140);
+}
+
+
+void display_victory_prompt(SDL_Renderer* rend)
+{
+    // Draw box on center of screen
+    int box_width = ns_Tutris::FIELD_WIDTH*ns_Tutris::BLOCK_SIZE_PIXEL + 200;
+    int box_height = 200;
+    int box_x_pos = SCREEN_WIDTH/2 - (ns_Tutris::FIELD_WIDTH*ns_Tutris::BLOCK_SIZE_PIXEL)/2 - 100;
+    int box_y_pos = SCREEN_HEIGHT/2 - box_height/2;
+    SDL_Rect game_over_square = {
+        box_x_pos,
+        box_y_pos,
+        box_width,
+        box_height
+    };
+    SDL_SetRenderDrawColor( rend, 0x00,0x00,0x00,0xFF);
+    SDL_RenderFillRect(rend, &game_over_square);
+    SDL_SetRenderDrawColor( rend, 0xFF,0xFF,0xFF,0xFF);
+    SDL_RenderDrawRect(rend, &game_over_square);
+
+    SDL_Utils::renderTexture(text_victory, rend, box_x_pos + 30, box_y_pos + 20);
     SDL_Utils::renderTexture(text_end_prompt, rend, box_x_pos + 30, box_y_pos + 100);
     SDL_Utils::renderTexture(text_end_prompt2, rend, box_x_pos + 30, box_y_pos + 140);
 }
