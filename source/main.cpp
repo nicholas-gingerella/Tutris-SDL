@@ -198,13 +198,13 @@ int main(int argc, char **argv)
         SDL_Quit();
     }
 
-    // sfx_victory = Mix_LoadWAV("../resources/sounds/victory.wav");
-    // if (sfx_victory == nullptr)
-    // {
-    //     std::cout << Mix_GetError() << std::endl;
-    //     SDL_Utils::cleanup(window);
-    //     SDL_Quit();
-    // }
+    sfx_victory = Mix_LoadWAV("../resources/sounds/victory.wav");
+    if (sfx_victory == nullptr)
+    {
+        std::cout << Mix_GetError() << std::endl;
+        SDL_Utils::cleanup(window);
+        SDL_Quit();
+    }
 
     // Load Text
     text_game_over = SDL_Utils::renderText("GAME OVER",
@@ -438,7 +438,7 @@ int main(int argc, char **argv)
                     }
 
                     // Play victory sound and display victory message
-                    Mix_PlayChannel(-1, sfx_gameover, 0);
+                    Mix_PlayChannel(-1, sfx_victory, 0);
 
                     std::cout << "NICE GAME!" << std::endl;
                     std::cout << "SCORE: " << score << std::endl;
@@ -482,7 +482,6 @@ int main(int argc, char **argv)
                     if (game_running)
                     {
                         tutris_state = game_state::playing;
-                        std::cout << "transition victory -> playing" << std::endl;
 
                         // cleanup current game instance and create a new one
                         delete game_instance;
@@ -616,7 +615,7 @@ int main(int argc, char **argv)
                 int score_y_pos = SCREEN_HEIGHT/2 - (game_instance->getNumRows()*ns_Tutris::BLOCK_SIZE_PIXEL)/2;
                 SDL_Utils::renderTexture(text_score, renderer,score_x_pos ,score_y_pos );
                 SDL_Utils::renderTexture(text_timer, renderer,score_x_pos ,score_y_pos + 20 );
-                
+
                 // display victory screen
                 display_victory_prompt(renderer);
                 break;
