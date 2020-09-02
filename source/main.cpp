@@ -848,11 +848,14 @@ void game_update(SDL_Renderer* rend)
 
             // Re-Render screen with new rows marked for clearing
             // Mark rows for clearing
+            int score_x_pos = SCREEN_WIDTH/2 + (game_instance->getNumCols()*ns_Tutris::BLOCK_SIZE_PIXEL)/2 + 10;
+            int score_y_pos = SCREEN_HEIGHT/2 - (game_instance->getNumRows()*ns_Tutris::BLOCK_SIZE_PIXEL)/2;
             game_instance->markClearRows(clear_rows);
             SDL_SetRenderDrawColor(rend, ns_Tutris::COLOR_BACKGROUND.r, ns_Tutris::COLOR_BACKGROUND.g, ns_Tutris::COLOR_BACKGROUND.b, 0xFF);
             SDL_RenderClear(rend);
             game_instance->render(rend);
-            SDL_Utils::renderTexture(text_score, rend, SCREEN_WIDTH/2 + (game_instance->getNumCols()*ns_Tutris::BLOCK_SIZE_PIXEL)/2 + 10, SCREEN_HEIGHT/2 - (game_instance->getNumRows()*ns_Tutris::BLOCK_SIZE_PIXEL)/2);
+            SDL_Utils::renderTexture(text_score, rend, score_x_pos, score_y_pos);
+            SDL_Utils::renderTexture(text_timer, rend,score_x_pos ,score_y_pos + 20 );
             SDL_RenderPresent(rend);
 
             // Play sound effect
@@ -890,7 +893,8 @@ void game_update(SDL_Renderer* rend)
             SDL_SetRenderDrawColor(rend, ns_Tutris::COLOR_BACKGROUND.r, ns_Tutris::COLOR_BACKGROUND.g, ns_Tutris::COLOR_BACKGROUND.b, 0xFF);
             SDL_RenderClear(rend);
             game_instance->render(rend);
-            SDL_Utils::renderTexture(text_score, rend, SCREEN_WIDTH/2 + (game_instance->getNumCols()*ns_Tutris::BLOCK_SIZE_PIXEL)/2 + 10, SCREEN_HEIGHT/2 - (game_instance->getNumRows()*ns_Tutris::BLOCK_SIZE_PIXEL)/2);
+            SDL_Utils::renderTexture(text_score, rend, score_x_pos, score_y_pos);
+            SDL_Utils::renderTexture(text_timer, rend,score_x_pos ,score_y_pos + 20 );
             SDL_RenderPresent(rend);
 
             // All cleared rows now handled an put in place.
