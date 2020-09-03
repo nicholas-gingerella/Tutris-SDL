@@ -27,6 +27,8 @@ void display_title_prompt(SDL_Renderer*);
 void display_Pause_prompt(SDL_Renderer*);
 std::string get_countdown_timer(unsigned int);
 void game_update(SDL_Renderer*);
+void renderBox(SDL_Renderer*, int, int, int, int, ns_Tutris::tutris_color, ns_Tutris::tutris_color);
+void renderBoxCenter(SDL_Renderer *rend, int, int, ns_Tutris::tutris_color, ns_Tutris::tutris_color);
 
 const int SCREEN_WIDTH = 1024;
 const int SCREEN_HEIGHT = 728;
@@ -1038,4 +1040,35 @@ std::string get_countdown_timer(unsigned int elapsed_time_ms)
     secs_string << std::setfill('0') << std::setw(2) << num_secs_display;  
 
     return std::string(mins_string.str() + ":" + secs_string.str());
+}
+
+void renderBoxCenter(SDL_Renderer *rend,
+                int w, 
+                int h, 
+                ns_Tutris::tutris_color bg, 
+                ns_Tutris::tutris_color outline )
+{
+    int box_x_pos = SCREEN_WIDTH/2 - w/2;
+    int box_y_pos = SCREEN_HEIGHT/2 - h/2;
+    renderBox(rend, box_x_pos, box_y_pos, w, h, bg, outline);
+}
+
+void renderBox(SDL_Renderer *rend, 
+                int x_pos, 
+                int y_pox, 
+                int w, 
+                int h, 
+                ns_Tutris::tutris_color bg, 
+                ns_Tutris::tutris_color outline )
+{
+    SDL_Rect box = {
+        x_pos,
+        y_pox,
+        w,
+        h
+    };
+    SDL_SetRenderDrawColor( rend, bg.r ,bg.g ,bg.b ,0xFF);
+    SDL_RenderFillRect(rend, &box);
+    SDL_SetRenderDrawColor( rend, outline.r,outline.g,outline.b,0xFF);
+    SDL_RenderDrawRect(rend, &box);
 }
