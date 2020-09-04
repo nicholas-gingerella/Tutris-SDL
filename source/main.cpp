@@ -930,92 +930,53 @@ void game_update(SDL_Renderer* rend)
 
 void display_game_over_prompt(SDL_Renderer* rend)
 {
-    // Draw box on center of screen
     int box_width = ns_Tutris::FIELD_WIDTH*ns_Tutris::BLOCK_SIZE_PIXEL + 200;
     int box_height = 200;
-    int box_x_pos = SCREEN_WIDTH/2 - (ns_Tutris::FIELD_WIDTH*ns_Tutris::BLOCK_SIZE_PIXEL)/2 - 100;
-    int box_y_pos = SCREEN_HEIGHT/2 - box_height/2;
-    SDL_Rect game_over_square = {
-        box_x_pos,
-        box_y_pos,
-        box_width,
-        box_height
-    };
-    SDL_SetRenderDrawColor( rend, 0x00,0x00,0x00,0xFF);
-    SDL_RenderFillRect(rend, &game_over_square);
-    SDL_SetRenderDrawColor( rend, 0xFF,0xFF,0xFF,0xFF);
-    SDL_RenderDrawRect(rend, &game_over_square);
+    renderBoxCenter(rend, box_width, box_height, ns_Tutris::COLOR_BLACK, ns_Tutris::COLOR_RED);
 
-    SDL_Utils::renderTexture(text_game_over, rend, box_x_pos + 30, box_y_pos + 20);
-    SDL_Utils::renderTexture(text_end_prompt, rend, box_x_pos + 30, box_y_pos + 100);
-    SDL_Utils::renderTexture(text_end_prompt2, rend, box_x_pos + 30, box_y_pos + 140);
+    int text_x_pos = SCREEN_WIDTH/2 - (ns_Tutris::FIELD_WIDTH*ns_Tutris::BLOCK_SIZE_PIXEL)/2 - 70;
+    int text_y_pos = SCREEN_HEIGHT/2 - box_height/2;
+
+    SDL_Utils::renderTexture(text_game_over, rend, text_x_pos, text_y_pos + 20);
+    SDL_Utils::renderTexture(text_end_prompt, rend, text_x_pos, text_y_pos + 100);
+    SDL_Utils::renderTexture(text_end_prompt2, rend, text_x_pos, text_y_pos + 140);
 }
 
 
 void display_victory_prompt(SDL_Renderer* rend)
 {
-    // Draw box on center of screen
     int box_width = ns_Tutris::FIELD_WIDTH*ns_Tutris::BLOCK_SIZE_PIXEL + 200;
     int box_height = 200;
-    int box_x_pos = SCREEN_WIDTH/2 - (ns_Tutris::FIELD_WIDTH*ns_Tutris::BLOCK_SIZE_PIXEL)/2 - 100;
-    int box_y_pos = SCREEN_HEIGHT/2 - box_height/2;
-    SDL_Rect game_over_square = {
-        box_x_pos,
-        box_y_pos,
-        box_width,
-        box_height
-    };
-    SDL_SetRenderDrawColor( rend, 0x00,0x00,0x00,0xFF);
-    SDL_RenderFillRect(rend, &game_over_square);
-    SDL_SetRenderDrawColor( rend, 0xFF,0xFF,0xFF,0xFF);
-    SDL_RenderDrawRect(rend, &game_over_square);
+    renderBoxCenter(rend, box_width, box_height, ns_Tutris::COLOR_BLACK, ns_Tutris::COLOR_GREEN);
 
-    SDL_Utils::renderTexture(text_victory, rend, box_x_pos + 30, box_y_pos + 20);
-    SDL_Utils::renderTexture(text_end_prompt, rend, box_x_pos + 30, box_y_pos + 100);
-    SDL_Utils::renderTexture(text_end_prompt2, rend, box_x_pos + 30, box_y_pos + 140);
+    int text_x_pos = SCREEN_WIDTH/2 - (ns_Tutris::FIELD_WIDTH*ns_Tutris::BLOCK_SIZE_PIXEL)/2 - 60;
+    int text_y_pos = SCREEN_HEIGHT/2 - box_height/2;
+    SDL_Utils::renderTexture(text_victory, rend, text_x_pos, text_y_pos + 20);
+    SDL_Utils::renderTexture(text_end_prompt, rend, text_x_pos, text_y_pos + 100);
+    SDL_Utils::renderTexture(text_end_prompt2, rend, text_x_pos, text_y_pos + 140);
 }
 
 void display_title_prompt(SDL_Renderer* rend)
 {
-    // Draw box on center of screen
     int box_width = ns_Tutris::FIELD_WIDTH*ns_Tutris::BLOCK_SIZE_PIXEL + 200;
     int box_height = 200;
-    int box_x_pos = SCREEN_WIDTH/2 - (ns_Tutris::FIELD_WIDTH*ns_Tutris::BLOCK_SIZE_PIXEL)/2 - 100;
-    int box_y_pos = SCREEN_HEIGHT/2 - box_height/2;
-    SDL_Rect game_over_square = {
-        box_x_pos,
-        box_y_pos,
-        box_width,
-        box_height
-    };
-    SDL_SetRenderDrawColor( rend, 0x00,0x00,0x00,0xFF);
-    SDL_RenderFillRect(rend, &game_over_square);
-    SDL_SetRenderDrawColor( rend, 0xFF,0xFF,0xFF,0xFF);
-    SDL_RenderDrawRect(rend, &game_over_square);
+    renderBoxCenter(rend, box_width, box_height, ns_Tutris::COLOR_BLACK, ns_Tutris::COLOR_WHITE);
 
-    SDL_Utils::renderTexture(text_title, rend, box_x_pos + 110, box_y_pos + 20);
-    SDL_Utils::renderTexture(text_title_prompt_start, rend, box_x_pos + 95, box_y_pos + 120);
+    int text_x_pos = SCREEN_WIDTH/2 - (ns_Tutris::FIELD_WIDTH*ns_Tutris::BLOCK_SIZE_PIXEL)/2;
+    int text_y_pos = SCREEN_HEIGHT/2 - box_height/2;
+    SDL_Utils::renderTexture(text_title, rend, text_x_pos + 10, text_y_pos + 40);
+    SDL_Utils::renderTexture(text_title_prompt_start, rend, text_x_pos, text_y_pos + 120);
 }
 
 void display_Pause_prompt(SDL_Renderer* rend)
 {
-    // Draw box on center of screen
     int box_width = ns_Tutris::FIELD_WIDTH*ns_Tutris::BLOCK_SIZE_PIXEL + 200;
     int box_height = 200;
-    int box_x_pos = SCREEN_WIDTH/2 - (ns_Tutris::FIELD_WIDTH*ns_Tutris::BLOCK_SIZE_PIXEL)/2 - 100;
-    int box_y_pos = SCREEN_HEIGHT/2 - box_height/2;
-    SDL_Rect game_over_square = {
-        box_x_pos,
-        box_y_pos,
-        box_width,
-        box_height
-    };
-    SDL_SetRenderDrawColor( rend, 0x00,0x00,0x00,0xFF);
-    SDL_RenderFillRect(rend, &game_over_square);
-    SDL_SetRenderDrawColor( rend, 0xFF,0xFF,0xFF,0xFF);
-    SDL_RenderDrawRect(rend, &game_over_square);
+    renderBoxCenter(rend, box_width, box_height, ns_Tutris::COLOR_BLACK, ns_Tutris::COLOR_WHITE);
 
-    SDL_Utils::renderTexture(text_pause, rend, box_x_pos + 100, box_y_pos + 70);
+    int text_x_pos = SCREEN_WIDTH/2 - (ns_Tutris::FIELD_WIDTH*ns_Tutris::BLOCK_SIZE_PIXEL)/2 - 100;
+    int text_y_pos = SCREEN_HEIGHT/2 - box_height/2;
+    SDL_Utils::renderTexture(text_pause, rend, text_x_pos + 100, text_y_pos + 70);
 }
 
 std::string get_countdown_timer(unsigned int elapsed_time_ms)
@@ -1042,17 +1003,6 @@ std::string get_countdown_timer(unsigned int elapsed_time_ms)
     return std::string(mins_string.str() + ":" + secs_string.str());
 }
 
-void renderBoxCenter(SDL_Renderer *rend,
-                int w, 
-                int h, 
-                ns_Tutris::tutris_color bg, 
-                ns_Tutris::tutris_color outline )
-{
-    int box_x_pos = SCREEN_WIDTH/2 - w/2;
-    int box_y_pos = SCREEN_HEIGHT/2 - h/2;
-    renderBox(rend, box_x_pos, box_y_pos, w, h, bg, outline);
-}
-
 void renderBox(SDL_Renderer *rend, 
                 int x_pos, 
                 int y_pox, 
@@ -1072,3 +1022,16 @@ void renderBox(SDL_Renderer *rend,
     SDL_SetRenderDrawColor( rend, outline.r,outline.g,outline.b,0xFF);
     SDL_RenderDrawRect(rend, &box);
 }
+
+void renderBoxCenter(SDL_Renderer *rend,
+                int w, 
+                int h, 
+                ns_Tutris::tutris_color bg, 
+                ns_Tutris::tutris_color outline )
+{
+    int box_x_pos = SCREEN_WIDTH/2 - w/2;
+    int box_y_pos = SCREEN_HEIGHT/2 - h/2;
+    renderBox(rend, box_x_pos, box_y_pos, w, h, bg, outline);
+}
+
+
