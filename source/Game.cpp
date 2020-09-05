@@ -35,14 +35,14 @@ m_time_remaining_ms(ns_Tutris::MAX_TIME_MS)
 
     ns_Tutris::block wall_block;
     wall_block.block_type = ns_Tutris::grid_cell_type::empty;
-    wall_block.color = ns_Tutris::COLOR_DARKGREY;
+    wall_block.color = ns_Tutris::TUTRIS_COLOR_DARKGREY;
 
     // initialize to empty
     for (int i = 0; i < num_grid_elems; ++i)
     {
         ns_Tutris::block empty_block;
         empty_block.block_type = ns_Tutris::grid_cell_type::empty;
-        empty_block.color = ns_Tutris::COLOR_LIGHTGREY;
+        empty_block.color = ns_Tutris::TUTRIS_COLOR_LIGHTGREY;
         m_grid[i] = empty_block;
     }
 

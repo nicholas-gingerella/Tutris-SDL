@@ -49,7 +49,11 @@ Mix_Chunk *sfx_collapse = nullptr;
 Mix_Chunk *sfx_row_clear = nullptr;
 Mix_Chunk *sfx_gameover = nullptr;
 Mix_Chunk *sfx_victory = nullptr;
-const std::string resource_path = "../resources/fonts/";
+const std::string resource_path_fonts = "../resources/fonts/";
+const std::string resource_path_music = "../resources/music/";
+const std::string resource_path_sounds = "../resources/sounds/";
+const std::string main_font_path = resource_path_fonts + "sample.ttf";
+
 SDL_Texture *text_score;
 SDL_Texture *text_timer;
 SDL_Texture *text_title;
@@ -59,7 +63,8 @@ SDL_Texture *text_end_prompt;
 SDL_Texture *text_end_prompt2;
 SDL_Texture *text_pause;
 SDL_Texture *text_victory;
-SDL_Color COLOR_WHITE = {255, 255, 255, 255};
+
+SDL_Color SDL_COLOR_WHITE = {255, 255, 255, 255};
 
 
 Game* game_instance = new Game(SCREEN_WIDTH/2 - ((ns_Tutris::FIELD_WIDTH/2)*ns_Tutris::BLOCK_SIZE_PIXEL), 100, ns_Tutris::FIELD_WIDTH, ns_Tutris::FIELD_HEIGHT);
@@ -210,8 +215,8 @@ int main(int argc, char **argv)
 
     // Load Text
     text_game_over = SDL_Utils::renderText("GAME OVER",
-        resource_path + "sample.ttf",
-        COLOR_WHITE,
+        main_font_path,
+        SDL_COLOR_WHITE,
         72,
         renderer
     );
@@ -227,8 +232,8 @@ int main(int argc, char **argv)
     }
 
     text_victory = SDL_Utils::renderText("NICE GAME!",
-        resource_path + "sample.ttf",
-        COLOR_WHITE,
+        main_font_path,
+        SDL_COLOR_WHITE,
         72,
         renderer
     );
@@ -244,8 +249,8 @@ int main(int argc, char **argv)
     }
 
     text_end_prompt = SDL_Utils::renderText("Press ESC key to Quit",
-        resource_path + "sample.ttf",
-        COLOR_WHITE,
+        main_font_path,
+        SDL_COLOR_WHITE,
         24,
         renderer
     );
@@ -261,8 +266,8 @@ int main(int argc, char **argv)
     }
 
     text_end_prompt2 = SDL_Utils::renderText("Press SPACE key to start new game",
-        resource_path + "sample.ttf",
-        COLOR_WHITE,
+        main_font_path,
+        SDL_COLOR_WHITE,
         24,
         renderer
     );
@@ -278,8 +283,8 @@ int main(int argc, char **argv)
     }
 
     text_title = SDL_Utils::renderText("TUTRIS",
-    resource_path + "sample.ttf",
-    COLOR_WHITE,
+    main_font_path,
+    SDL_COLOR_WHITE,
     72,
     renderer
     );
@@ -295,8 +300,8 @@ int main(int argc, char **argv)
     }
 
     text_title_prompt_start = SDL_Utils::renderText("Press SPACE key to start",
-    resource_path + "sample.ttf",
-    COLOR_WHITE,
+    main_font_path,
+    SDL_COLOR_WHITE,
     24,
     renderer
     );
@@ -312,8 +317,8 @@ int main(int argc, char **argv)
     }
 
     text_pause = SDL_Utils::renderText("PAUSED",
-    resource_path + "sample.ttf",
-    COLOR_WHITE,
+    main_font_path,
+    SDL_COLOR_WHITE,
     72,
     renderer
     );
@@ -340,8 +345,8 @@ int main(int argc, char **argv)
     score_str << "SCORE: ";
     score_str << score;
     text_score = SDL_Utils::renderText(score_str.str(),
-        resource_path + "sample.ttf",
-        COLOR_WHITE,
+        main_font_path,
+        SDL_COLOR_WHITE,
         24,
         renderer);
 
@@ -375,7 +380,7 @@ int main(int argc, char **argv)
                     score_str << score;
                     SDL_Color color = {255, 255, 255, 255};
                     text_score = SDL_Utils::renderText(score_str.str(),
-                        resource_path + "sample.ttf",
+                        main_font_path,
                         color,
                         24,
                         renderer
@@ -495,7 +500,7 @@ int main(int argc, char **argv)
                         score_str << score;
                         SDL_Color color = {255, 255, 255, 255};
                         text_score = SDL_Utils::renderText(score_str.str(),
-                            resource_path + "sample.ttf",
+                            main_font_path,
                             color,
                             24,
                             renderer
@@ -542,7 +547,7 @@ int main(int argc, char **argv)
                         score_str << score;
                         SDL_Color color = {255, 255, 255, 255};
                         text_score = SDL_Utils::renderText(score_str.str(),
-                            resource_path + "sample.ttf",
+                            main_font_path,
                             color,
                             24,
                             renderer
@@ -742,8 +747,8 @@ void game_update(SDL_Renderer* rend)
     
     std::string timer = get_countdown_timer(elapsed_ms);
     text_timer = SDL_Utils::renderText(timer,
-        resource_path + "sample.ttf",
-        COLOR_WHITE,
+        main_font_path,
+        SDL_COLOR_WHITE,
         24,
         rend
     );
@@ -833,7 +838,7 @@ void game_update(SDL_Renderer* rend)
             score_str << score;
             SDL_Color color = {255, 255, 255, 255};
             text_score = SDL_Utils::renderText(score_str.str(),
-                resource_path + "sample.ttf",
+                main_font_path,
                 color,
                 24,
                 rend);
@@ -932,7 +937,7 @@ void display_game_over_prompt(SDL_Renderer* rend)
 {
     int box_width = ns_Tutris::FIELD_WIDTH*ns_Tutris::BLOCK_SIZE_PIXEL + 200;
     int box_height = 200;
-    renderBoxCenter(rend, box_width, box_height, ns_Tutris::COLOR_BLACK, ns_Tutris::COLOR_RED);
+    renderBoxCenter(rend, box_width, box_height, ns_Tutris::TUTRIS_COLOR_BLACK, ns_Tutris::TUTRIS_COLOR_RED);
 
     int text_x_pos = SCREEN_WIDTH/2 - (ns_Tutris::FIELD_WIDTH*ns_Tutris::BLOCK_SIZE_PIXEL)/2 - 70;
     int text_y_pos = SCREEN_HEIGHT/2 - box_height/2;
@@ -947,7 +952,7 @@ void display_victory_prompt(SDL_Renderer* rend)
 {
     int box_width = ns_Tutris::FIELD_WIDTH*ns_Tutris::BLOCK_SIZE_PIXEL + 200;
     int box_height = 200;
-    renderBoxCenter(rend, box_width, box_height, ns_Tutris::COLOR_BLACK, ns_Tutris::COLOR_GREEN);
+    renderBoxCenter(rend, box_width, box_height, ns_Tutris::TUTRIS_COLOR_BLACK, ns_Tutris::TUTRIS_COLOR_GREEN);
 
     int text_x_pos = SCREEN_WIDTH/2 - (ns_Tutris::FIELD_WIDTH*ns_Tutris::BLOCK_SIZE_PIXEL)/2 - 60;
     int text_y_pos = SCREEN_HEIGHT/2 - box_height/2;
@@ -960,7 +965,7 @@ void display_title_prompt(SDL_Renderer* rend)
 {
     int box_width = ns_Tutris::FIELD_WIDTH*ns_Tutris::BLOCK_SIZE_PIXEL + 200;
     int box_height = 200;
-    renderBoxCenter(rend, box_width, box_height, ns_Tutris::COLOR_BLACK, ns_Tutris::COLOR_WHITE);
+    renderBoxCenter(rend, box_width, box_height, ns_Tutris::TUTRIS_COLOR_BLACK, ns_Tutris::TUTRIS_COLOR_WHITE);
 
     int text_x_pos = SCREEN_WIDTH/2 - (ns_Tutris::FIELD_WIDTH*ns_Tutris::BLOCK_SIZE_PIXEL)/2;
     int text_y_pos = SCREEN_HEIGHT/2 - box_height/2;
@@ -972,7 +977,7 @@ void display_Pause_prompt(SDL_Renderer* rend)
 {
     int box_width = ns_Tutris::FIELD_WIDTH*ns_Tutris::BLOCK_SIZE_PIXEL + 200;
     int box_height = 200;
-    renderBoxCenter(rend, box_width, box_height, ns_Tutris::COLOR_BLACK, ns_Tutris::COLOR_WHITE);
+    renderBoxCenter(rend, box_width, box_height, ns_Tutris::TUTRIS_COLOR_BLACK, ns_Tutris::TUTRIS_COLOR_WHITE);
 
     int text_x_pos = SCREEN_WIDTH/2 - (ns_Tutris::FIELD_WIDTH*ns_Tutris::BLOCK_SIZE_PIXEL)/2 - 100;
     int text_y_pos = SCREEN_HEIGHT/2 - box_height/2;

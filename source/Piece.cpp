@@ -24,42 +24,42 @@ void Piece::setShape(ns_Tutris::tetromino_shape s, ns_Tutris::piece_color color)
     {
         case ns_Tutris::piece_color::piece_red:
         {
-            color_r = ns_Tutris::COLOR_RED.r;
-            color_g = ns_Tutris::COLOR_RED.g;
-            color_b = ns_Tutris::COLOR_RED.b;
-            outline_color_r = ns_Tutris::COLOR_DARKRED.r;
-            outline_color_g = ns_Tutris::COLOR_DARKRED.g;
-            outline_color_b = ns_Tutris::COLOR_DARKRED.b;
+            color_r = ns_Tutris::TUTRIS_COLOR_RED.r;
+            color_g = ns_Tutris::TUTRIS_COLOR_RED.g;
+            color_b = ns_Tutris::TUTRIS_COLOR_RED.b;
+            outline_color_r = ns_Tutris::TUTRIS_COLOR_DARKRED.r;
+            outline_color_g = ns_Tutris::TUTRIS_COLOR_DARKRED.g;
+            outline_color_b = ns_Tutris::TUTRIS_COLOR_DARKRED.b;
             break;
         }
         case ns_Tutris::piece_color::piece_blue:
         {
-            color_r = ns_Tutris::COLOR_BLUE.r;
-            color_g = ns_Tutris::COLOR_BLUE.g;
-            color_b = ns_Tutris::COLOR_BLUE.b;
-            outline_color_r = ns_Tutris::COLOR_DARKBLUE.r;
-            outline_color_g = ns_Tutris::COLOR_DARKBLUE.g;
-            outline_color_b = ns_Tutris::COLOR_DARKBLUE.b;
+            color_r = ns_Tutris::TUTRIS_COLOR_BLUE.r;
+            color_g = ns_Tutris::TUTRIS_COLOR_BLUE.g;
+            color_b = ns_Tutris::TUTRIS_COLOR_BLUE.b;
+            outline_color_r = ns_Tutris::TUTRIS_COLOR_DARKBLUE.r;
+            outline_color_g = ns_Tutris::TUTRIS_COLOR_DARKBLUE.g;
+            outline_color_b = ns_Tutris::TUTRIS_COLOR_DARKBLUE.b;
             break;
         }
         case ns_Tutris::piece_color::piece_green:
         {
-            color_r = ns_Tutris::COLOR_GREEN.r;
-            color_g = ns_Tutris::COLOR_GREEN.g;
-            color_b = ns_Tutris::COLOR_GREEN.b;
-            outline_color_r = ns_Tutris::COLOR_DARKGREEN.r;
-            outline_color_g = ns_Tutris::COLOR_DARKGREEN.g;
-            outline_color_b = ns_Tutris::COLOR_DARKGREEN.b;
+            color_r = ns_Tutris::TUTRIS_COLOR_GREEN.r;
+            color_g = ns_Tutris::TUTRIS_COLOR_GREEN.g;
+            color_b = ns_Tutris::TUTRIS_COLOR_GREEN.b;
+            outline_color_r = ns_Tutris::TUTRIS_COLOR_DARKGREEN.r;
+            outline_color_g = ns_Tutris::TUTRIS_COLOR_DARKGREEN.g;
+            outline_color_b = ns_Tutris::TUTRIS_COLOR_DARKGREEN.b;
             break;
         }
         case ns_Tutris::piece_color::piece_yellow:
         {
-            color_r = ns_Tutris::COLOR_YELLOW.r;
-            color_g = ns_Tutris::COLOR_YELLOW.g;
-            color_b = ns_Tutris::COLOR_YELLOW.b;
-            outline_color_r = ns_Tutris::COLOR_DARKYELLOW.r;
-            outline_color_g = ns_Tutris::COLOR_DARKYELLOW.g;
-            outline_color_b = ns_Tutris::COLOR_DARKYELLOW.b;
+            color_r = ns_Tutris::TUTRIS_COLOR_YELLOW.r;
+            color_g = ns_Tutris::TUTRIS_COLOR_YELLOW.g;
+            color_b = ns_Tutris::TUTRIS_COLOR_YELLOW.b;
+            outline_color_r = ns_Tutris::TUTRIS_COLOR_DARKYELLOW.r;
+            outline_color_g = ns_Tutris::TUTRIS_COLOR_DARKYELLOW.g;
+            outline_color_b = ns_Tutris::TUTRIS_COLOR_DARKYELLOW.b;
             break;
         }
         case ns_Tutris::piece_color::piece_random:
@@ -68,12 +68,12 @@ void Piece::setShape(ns_Tutris::tetromino_shape s, ns_Tutris::piece_color color)
         default:
         {
             // Uh....we shouldn't get here...hopefully
-            color_r = ns_Tutris::COLOR_WHITE.r;
-            color_g = ns_Tutris::COLOR_WHITE.g;
-            color_b = ns_Tutris::COLOR_WHITE.b;
-            outline_color_r = ns_Tutris::COLOR_BLACK.r;
-            outline_color_g = ns_Tutris::COLOR_BLACK.g;
-            outline_color_b = ns_Tutris::COLOR_BLACK.b;
+            color_r = ns_Tutris::TUTRIS_COLOR_WHITE.r;
+            color_g = ns_Tutris::TUTRIS_COLOR_WHITE.g;
+            color_b = ns_Tutris::TUTRIS_COLOR_WHITE.b;
+            outline_color_r = ns_Tutris::TUTRIS_COLOR_BLACK.r;
+            outline_color_g = ns_Tutris::TUTRIS_COLOR_BLACK.g;
+            outline_color_b = ns_Tutris::TUTRIS_COLOR_BLACK.b;
             break;
         }
     }
