@@ -28,7 +28,18 @@ void display_Pause_prompt(SDL_Renderer*);
 std::string get_countdown_timer(unsigned int);
 void game_update(SDL_Renderer*);
 void renderBox(SDL_Renderer*, int, int, int, int, ns_Tutris::tutris_color, ns_Tutris::tutris_color);
-void renderBoxCenter(SDL_Renderer *rend, int, int, ns_Tutris::tutris_color, ns_Tutris::tutris_color);
+void renderBoxCenter(SDL_Renderer*, int, int, ns_Tutris::tutris_color, ns_Tutris::tutris_color);
+void updateGameScoreText(SDL_Renderer*, unsigned int);
+void clearScreen(SDL_Renderer*);
+void renderScoreText(SDL_Renderer*);
+void renderTimerText(SDL_Renderer*);
+void redrawGameField(SDL_Renderer*);
+
+
+
+// Main window and renderer for SDL
+SDL_Window *window = nullptr;
+SDL_Renderer *renderer = nullptr;
 
 const int SCREEN_WIDTH = 1024;
 const int SCREEN_HEIGHT = 728;
@@ -36,11 +47,13 @@ const int TILE_SIZE = 80;
 const int PAUSE_TIME_IN_SECONDS = 10;
 const int MILLISECONDS_IN_SECONDS = 1000;
 const int SDL_RENDERER_FIRST_AVAILABLE_DRIVER = -1;
+
 const std::string WINDOW_TITLE = "Tutris";
-SDL_Window *window = nullptr;
-SDL_Renderer *renderer = nullptr;
 std::stringstream score_str;
 std::string game_timer_str;
+
+
+
 Mix_Music *bgm_game = nullptr;
 Mix_Chunk *sfx_drop = nullptr;
 Mix_Chunk *sfx_pause_on = nullptr;
@@ -49,6 +62,7 @@ Mix_Chunk *sfx_collapse = nullptr;
 Mix_Chunk *sfx_row_clear = nullptr;
 Mix_Chunk *sfx_gameover = nullptr;
 Mix_Chunk *sfx_victory = nullptr;
+
 const std::string resource_path_fonts = "../resources/fonts/";
 const std::string resource_path_music = "../resources/music/";
 const std::string resource_path_sounds = "../resources/sounds/";
@@ -59,8 +73,8 @@ SDL_Texture *text_timer;
 SDL_Texture *text_title;
 SDL_Texture *text_title_prompt_start;
 SDL_Texture *text_game_over;
-SDL_Texture *text_end_prompt;
-SDL_Texture *text_end_prompt2;
+SDL_Texture *text_victory_prompt_quit;
+SDL_Texture *text_victory_prompt_start;
 SDL_Texture *text_pause;
 SDL_Texture *text_victory;
 
@@ -151,6 +165,7 @@ int main(int argc, char **argv)
         return 1;
     }
 
+    // Load Music and Sound Effects
     bgm_game = Mix_LoadMUS("../resources/music/bg_music.mp3");
     if (bgm_game == nullptr)
     {
@@ -213,7 +228,7 @@ int main(int argc, char **argv)
         SDL_Quit();
     }
 
-    // Load Text
+    // Load/Render in-game text
     text_game_over = SDL_Utils::renderText("GAME OVER",
         main_font_path,
         SDL_COLOR_WHITE,
@@ -237,7 +252,7 @@ int main(int argc, char **argv)
         72,
         renderer
     );
-    if ( text_game_over == nullptr )
+    if ( text_victory == nullptr )
     {
         std::cout << "Error loading Victory text" << std::endl;
         SDL_Utils::cleanup(renderer, window);
@@ -248,13 +263,13 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    text_end_prompt = SDL_Utils::renderText("Press ESC key to Quit",
+    text_victory_prompt_quit = SDL_Utils::renderText("Press ESC key to Quit",
         main_font_path,
         SDL_COLOR_WHITE,
         24,
         renderer
     );
-    if ( text_end_prompt == nullptr )
+    if ( text_victory_prompt_quit == nullptr )
     {
         std::cout << "Error loading QUIT text" << std::endl;
         SDL_Utils::cleanup(renderer, window);
@@ -265,13 +280,13 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    text_end_prompt2 = SDL_Utils::renderText("Press SPACE key to start new game",
+    text_victory_prompt_start = SDL_Utils::renderText("Press SPACE key to start new game",
         main_font_path,
         SDL_COLOR_WHITE,
         24,
         renderer
     );
-    if ( text_end_prompt2 == nullptr )
+    if ( text_victory_prompt_start == nullptr )
     {
         std::cout << "Error loading Start text" << std::endl;
         SDL_Utils::cleanup(renderer, window);
@@ -337,18 +352,14 @@ int main(int argc, char **argv)
     ///////////////////////////////
 
 
+    ///////////////////////////////
     // PROGRAM LOGIC STARTS HERE
+    ///////////////////////////////
+
     // Seed random generator
     srand(static_cast<unsigned>(time(NULL)));
 
-    score_str.str("");
-    score_str << "SCORE: ";
-    score_str << score;
-    text_score = SDL_Utils::renderText(score_str.str(),
-        main_font_path,
-        SDL_COLOR_WHITE,
-        24,
-        renderer);
+    updateGameScoreText(renderer, score);
 
     // Game loop
     while (game_running)
@@ -375,16 +386,7 @@ int main(int argc, char **argv)
                     game_instance = new Game(SCREEN_WIDTH/2 - ((ns_Tutris::FIELD_WIDTH/2)*ns_Tutris::BLOCK_SIZE_PIXEL), 100, ns_Tutris::FIELD_WIDTH, ns_Tutris::FIELD_HEIGHT);
                     elapsed_ms = 0;
                     score = 0;
-                    score_str.str("");
-                    score_str << "SCORE: ";
-                    score_str << score;
-                    SDL_Color color = {255, 255, 255, 255};
-                    text_score = SDL_Utils::renderText(score_str.str(),
-                        main_font_path,
-                        color,
-                        24,
-                        renderer
-                    );
+                    updateGameScoreText(renderer, score);
 
                     // If game over sound is still playing, stop it.
                     // (this will stop ALL channels)
@@ -423,9 +425,6 @@ int main(int argc, char **argv)
                     // Play game over sound
                     Mix_PlayChannel(-1, sfx_gameover, 0);
 
-                    std::cout << "GAME OVER" << std::endl;
-                    std::cout << "SCORE: " << score << std::endl;
-
                     // Display game over screen (in action control)
                 }
                 else if (!on_title_screen && (elapsed_ms >= ns_Tutris::MAX_TIME_MS))
@@ -446,9 +445,6 @@ int main(int argc, char **argv)
 
                     // Play victory sound and display victory message
                     Mix_PlayChannel(-1, sfx_victory, 0);
-
-                    std::cout << "NICE GAME!" << std::endl;
-                    std::cout << "SCORE: " << score << std::endl;
 
                     // Display victory screen (in action control)
                 }
@@ -495,22 +491,12 @@ int main(int argc, char **argv)
                         game_instance = new Game(SCREEN_WIDTH/2 - ((ns_Tutris::FIELD_WIDTH/2)*ns_Tutris::BLOCK_SIZE_PIXEL), 100, ns_Tutris::FIELD_WIDTH, ns_Tutris::FIELD_HEIGHT);
                         elapsed_ms = 0;
                         score = 0;
-                        score_str.str("");
-                        score_str << "SCORE: ";
-                        score_str << score;
-                        SDL_Color color = {255, 255, 255, 255};
-                        text_score = SDL_Utils::renderText(score_str.str(),
-                            main_font_path,
-                            color,
-                            24,
-                            renderer
-                        );
+                        updateGameScoreText(renderer, score);
 
                         // If game over sound is still playing, stop it.
                         // (this will stop ALL channels)
                         if (Mix_Playing(-1) != 0)
                         {
-                            std::cout << "Halt all sound" << std::endl;
                             Mix_HaltChannel(-1);
                         }
 
@@ -542,22 +528,12 @@ int main(int argc, char **argv)
                         game_instance = new Game(SCREEN_WIDTH/2 - ((ns_Tutris::FIELD_WIDTH/2)*ns_Tutris::BLOCK_SIZE_PIXEL), 100, ns_Tutris::FIELD_WIDTH, ns_Tutris::FIELD_HEIGHT);
                         elapsed_ms = 0;
                         score = 0;
-                        score_str.str("");
-                        score_str << "SCORE: ";
-                        score_str << score;
-                        SDL_Color color = {255, 255, 255, 255};
-                        text_score = SDL_Utils::renderText(score_str.str(),
-                            main_font_path,
-                            color,
-                            24,
-                            renderer
-                        );
+                        updateGameScoreText(renderer, score);
 
                         // If game over sound is still playing, stop it.
                         // (this will stop ALL channels)
                         if (Mix_Playing(-1) != 0)
                         {
-                            std::cout << "stopping sound" << std::endl;
                             Mix_HaltChannel(-1);
                         }
 
@@ -583,61 +559,30 @@ int main(int argc, char **argv)
         {
             case game_state::title:
             {
-                // display title screen
                 display_title_prompt(renderer);
                 break;
             }
             case game_state::playing:
             {
-                // Update game loop
                 game_update(renderer);
 
                 game_instance->render(renderer);
-                int score_x_pos = SCREEN_WIDTH/2 + (game_instance->getNumCols()*ns_Tutris::BLOCK_SIZE_PIXEL)/2 + 10;
-                int score_y_pos = SCREEN_HEIGHT/2 - (game_instance->getNumRows()*ns_Tutris::BLOCK_SIZE_PIXEL)/2;
-                SDL_Utils::renderTexture(text_score, renderer,score_x_pos ,score_y_pos );
-                SDL_Utils::renderTexture(text_timer, renderer,score_x_pos ,score_y_pos + 20 );
+                renderScoreText(renderer);
+                renderTimerText(renderer);
                 break;
             }
             case game_state::paused:
             {
-                // Want to keep the game field rendered
-                // and show the game over screen on top of field
-                game_instance->render(renderer);
-                int score_x_pos = SCREEN_WIDTH/2 + (game_instance->getNumCols()*ns_Tutris::BLOCK_SIZE_PIXEL)/2 + 10;
-                int score_y_pos = SCREEN_HEIGHT/2 - (game_instance->getNumRows()*ns_Tutris::BLOCK_SIZE_PIXEL)/2;
-                SDL_Utils::renderTexture(text_score, renderer,score_x_pos ,score_y_pos );
-                SDL_Utils::renderTexture(text_timer, renderer,score_x_pos ,score_y_pos + 20 );
-
-                // display pause screen
                 display_Pause_prompt(renderer);
                 break;
             }
             case game_state::victory:
             {
-                // Want to keep the game field rendered
-                // and show the game over screen on top of field
-                game_instance->render(renderer);
-                int score_x_pos = SCREEN_WIDTH/2 + (game_instance->getNumCols()*ns_Tutris::BLOCK_SIZE_PIXEL)/2 + 10;
-                int score_y_pos = SCREEN_HEIGHT/2 - (game_instance->getNumRows()*ns_Tutris::BLOCK_SIZE_PIXEL)/2;
-                SDL_Utils::renderTexture(text_score, renderer,score_x_pos ,score_y_pos );
-                SDL_Utils::renderTexture(text_timer, renderer,score_x_pos ,score_y_pos + 20 );
-
-                // display victory screen
                 display_victory_prompt(renderer);
                 break;
             }
             case game_state::gameover:
             {
-                // Want to keep the game field rendered
-                // and show the game over screen on top of field
-                game_instance->render(renderer);
-                int score_x_pos = SCREEN_WIDTH/2 + (game_instance->getNumCols()*ns_Tutris::BLOCK_SIZE_PIXEL)/2 + 10;
-                int score_y_pos = SCREEN_HEIGHT/2 - (game_instance->getNumRows()*ns_Tutris::BLOCK_SIZE_PIXEL)/2;
-                SDL_Utils::renderTexture(text_score, renderer,score_x_pos ,score_y_pos );
-                SDL_Utils::renderTexture(text_timer, renderer,score_x_pos ,score_y_pos + 20 );
-
-                // display game over screen
                 display_game_over_prompt(renderer);
                 break;
             }
@@ -719,25 +664,11 @@ int main(int argc, char **argv)
         }
 
         // RENDER
-        // Render Screen
         SDL_RenderPresent(renderer);
+        clearScreen(renderer);
 
-        // clear screen to bg color to prep for next update
-        SDL_SetRenderDrawColor(renderer, ns_Tutris::COLOR_BACKGROUND.r, ns_Tutris::COLOR_BACKGROUND.g, ns_Tutris::COLOR_BACKGROUND.b, 0xFF);
-        SDL_RenderClear(renderer);
     } // end while(game_running)
 
-    std::cout << "Ending game" << std::endl;
-
-    // Freezing when exiting for some reason
-    // Mix_FreeChunk(sfx_drop);
-    // Mix_FreeChunk(sfx_collapse);
-    // Mix_FreeChunk(sfx_row_clear);
-    // SDL_Utils::cleanup(renderer, window);
-    // /Mix_Quit();
-    // IMG_Quit();
-    // TTF_Quit();
-    // SDL_Quit();
     return 0;
 }
 
@@ -832,38 +763,13 @@ void game_update(SDL_Renderer* rend)
                 piece_fall_counter += 1; // slow the active piece speed down
             }
 
-            // Load text
-            score_str.str("");
-            score_str << "SCORE: ";
-            score_str << score;
-            SDL_Color color = {255, 255, 255, 255};
-            text_score = SDL_Utils::renderText(score_str.str(),
-                main_font_path,
-                color,
-                24,
-                rend);
-            if ( text_score == nullptr )
-            {
-                std::cout << "Error rendering Score text" << std::endl;
-                SDL_Utils::cleanup(renderer, window);
-                TTF_Quit();
-                IMG_Quit();
-                Mix_Quit();
-                SDL_Quit();
-                exit(1);
-            }
+            updateGameScoreText(rend, score);
 
             // Re-Render screen with new rows marked for clearing
             // Mark rows for clearing
-            int score_x_pos = SCREEN_WIDTH/2 + (game_instance->getNumCols()*ns_Tutris::BLOCK_SIZE_PIXEL)/2 + 10;
-            int score_y_pos = SCREEN_HEIGHT/2 - (game_instance->getNumRows()*ns_Tutris::BLOCK_SIZE_PIXEL)/2;
             game_instance->markClearRows(clear_rows);
-            SDL_SetRenderDrawColor(rend, ns_Tutris::COLOR_BACKGROUND.r, ns_Tutris::COLOR_BACKGROUND.g, ns_Tutris::COLOR_BACKGROUND.b, 0xFF);
-            SDL_RenderClear(rend);
-            game_instance->render(rend);
-            SDL_Utils::renderTexture(text_score, rend, score_x_pos, score_y_pos);
-            SDL_Utils::renderTexture(text_timer, rend,score_x_pos ,score_y_pos + 20 );
-            SDL_RenderPresent(rend);
+
+            redrawGameField(rend);
 
             // Play sound effect
             if (collapse)
@@ -896,13 +802,7 @@ void game_update(SDL_Renderer* rend)
                 game_instance->shiftBlocks(clear_rows);
             }
             
-            // Redraw Screen
-            SDL_SetRenderDrawColor(rend, ns_Tutris::COLOR_BACKGROUND.r, ns_Tutris::COLOR_BACKGROUND.g, ns_Tutris::COLOR_BACKGROUND.b, 0xFF);
-            SDL_RenderClear(rend);
-            game_instance->render(rend);
-            SDL_Utils::renderTexture(text_score, rend, score_x_pos, score_y_pos);
-            SDL_Utils::renderTexture(text_timer, rend,score_x_pos ,score_y_pos + 20 );
-            SDL_RenderPresent(rend);
+            redrawGameField(rend);
 
             // All cleared rows now handled an put in place.
             // Empty our list and scan field for more cleared
@@ -935,6 +835,10 @@ void game_update(SDL_Renderer* rend)
 
 void display_game_over_prompt(SDL_Renderer* rend)
 {
+    game_instance->render(rend);
+    renderScoreText(rend);
+    renderTimerText(rend);
+
     int box_width = ns_Tutris::FIELD_WIDTH*ns_Tutris::BLOCK_SIZE_PIXEL + 200;
     int box_height = 200;
     renderBoxCenter(rend, box_width, box_height, ns_Tutris::TUTRIS_COLOR_BLACK, ns_Tutris::TUTRIS_COLOR_RED);
@@ -943,13 +847,18 @@ void display_game_over_prompt(SDL_Renderer* rend)
     int text_y_pos = SCREEN_HEIGHT/2 - box_height/2;
 
     SDL_Utils::renderTexture(text_game_over, rend, text_x_pos, text_y_pos + 20);
-    SDL_Utils::renderTexture(text_end_prompt, rend, text_x_pos, text_y_pos + 100);
-    SDL_Utils::renderTexture(text_end_prompt2, rend, text_x_pos, text_y_pos + 140);
-}
+    SDL_Utils::renderTexture(text_victory_prompt_quit, rend, text_x_pos, text_y_pos + 100);
+    SDL_Utils::renderTexture(text_victory_prompt_start, rend, text_x_pos, text_y_pos + 140);
 
+    SDL_RenderPresent(rend);
+}
 
 void display_victory_prompt(SDL_Renderer* rend)
 {
+    game_instance->render(rend);
+    renderScoreText(rend);
+    renderTimerText(rend);
+
     int box_width = ns_Tutris::FIELD_WIDTH*ns_Tutris::BLOCK_SIZE_PIXEL + 200;
     int box_height = 200;
     renderBoxCenter(rend, box_width, box_height, ns_Tutris::TUTRIS_COLOR_BLACK, ns_Tutris::TUTRIS_COLOR_GREEN);
@@ -957,8 +866,10 @@ void display_victory_prompt(SDL_Renderer* rend)
     int text_x_pos = SCREEN_WIDTH/2 - (ns_Tutris::FIELD_WIDTH*ns_Tutris::BLOCK_SIZE_PIXEL)/2 - 60;
     int text_y_pos = SCREEN_HEIGHT/2 - box_height/2;
     SDL_Utils::renderTexture(text_victory, rend, text_x_pos, text_y_pos + 20);
-    SDL_Utils::renderTexture(text_end_prompt, rend, text_x_pos, text_y_pos + 100);
-    SDL_Utils::renderTexture(text_end_prompt2, rend, text_x_pos, text_y_pos + 140);
+    SDL_Utils::renderTexture(text_victory_prompt_quit, rend, text_x_pos, text_y_pos + 100);
+    SDL_Utils::renderTexture(text_victory_prompt_start, rend, text_x_pos, text_y_pos + 140);
+
+    SDL_RenderPresent(rend);
 }
 
 void display_title_prompt(SDL_Renderer* rend)
@@ -971,10 +882,16 @@ void display_title_prompt(SDL_Renderer* rend)
     int text_y_pos = SCREEN_HEIGHT/2 - box_height/2;
     SDL_Utils::renderTexture(text_title, rend, text_x_pos + 10, text_y_pos + 40);
     SDL_Utils::renderTexture(text_title_prompt_start, rend, text_x_pos, text_y_pos + 120);
+
+    SDL_RenderPresent(rend);
 }
 
 void display_Pause_prompt(SDL_Renderer* rend)
 {
+    game_instance->render(rend);
+    renderScoreText(rend);
+    renderTimerText(rend);
+
     int box_width = ns_Tutris::FIELD_WIDTH*ns_Tutris::BLOCK_SIZE_PIXEL + 200;
     int box_height = 200;
     renderBoxCenter(rend, box_width, box_height, ns_Tutris::TUTRIS_COLOR_BLACK, ns_Tutris::TUTRIS_COLOR_WHITE);
@@ -982,6 +899,8 @@ void display_Pause_prompt(SDL_Renderer* rend)
     int text_x_pos = SCREEN_WIDTH/2 - (ns_Tutris::FIELD_WIDTH*ns_Tutris::BLOCK_SIZE_PIXEL)/2 - 100;
     int text_y_pos = SCREEN_HEIGHT/2 - box_height/2;
     SDL_Utils::renderTexture(text_pause, rend, text_x_pos + 100, text_y_pos + 70);
+
+    SDL_RenderPresent(rend);
 }
 
 std::string get_countdown_timer(unsigned int elapsed_time_ms)
@@ -1029,14 +948,59 @@ void renderBox(SDL_Renderer *rend,
 }
 
 void renderBoxCenter(SDL_Renderer *rend,
-                int w, 
-                int h, 
-                ns_Tutris::tutris_color bg, 
-                ns_Tutris::tutris_color outline )
+                    int w, 
+                    int h, 
+                    ns_Tutris::tutris_color bg, 
+                    ns_Tutris::tutris_color outline )
 {
     int box_x_pos = SCREEN_WIDTH/2 - w/2;
     int box_y_pos = SCREEN_HEIGHT/2 - h/2;
     renderBox(rend, box_x_pos, box_y_pos, w, h, bg, outline);
+}
+
+void updateGameScoreText(SDL_Renderer* r, unsigned int s)
+{
+    std::stringstream ss;
+    ss.str("");
+    ss << "SCORE: ";
+    ss << s;
+    text_score = SDL_Utils::renderText(ss.str(),
+        main_font_path,
+        SDL_COLOR_WHITE,
+        24,
+        r);
+}
+
+void clearScreen(SDL_Renderer* r)
+{
+    SDL_SetRenderDrawColor(r, ns_Tutris::COLOR_BACKGROUND.r, ns_Tutris::COLOR_BACKGROUND.g, ns_Tutris::COLOR_BACKGROUND.b, 0xFF);
+    SDL_RenderClear(r);
+}
+
+void renderScoreText(SDL_Renderer* r)
+{
+    int score_x_pos = SCREEN_WIDTH/2 + (game_instance->getNumCols()*ns_Tutris::BLOCK_SIZE_PIXEL)/2;
+    score_x_pos += 10; // shift a few pixels away from game grid
+    int score_y_pos = SCREEN_HEIGHT/2 - (game_instance->getNumRows()*ns_Tutris::BLOCK_SIZE_PIXEL)/2;
+    SDL_Utils::renderTexture(text_score, r, score_x_pos, score_y_pos);
+}
+
+void renderTimerText(SDL_Renderer* r)
+{
+    int timer_x_pos = SCREEN_WIDTH/2 + (game_instance->getNumCols()*ns_Tutris::BLOCK_SIZE_PIXEL)/2;
+    timer_x_pos += 10; // shift a few pixels away from game grid
+    int timer_y_pos = SCREEN_HEIGHT/2 - (game_instance->getNumRows()*ns_Tutris::BLOCK_SIZE_PIXEL)/2;
+    timer_y_pos += 20; // shift down below score text
+    SDL_Utils::renderTexture(text_timer, r, timer_x_pos, timer_y_pos);
+}
+
+void redrawGameField(SDL_Renderer* r)
+{
+    clearScreen(r);
+    game_instance->render(r);
+    renderScoreText(r);
+    renderTimerText(r);
+    SDL_RenderPresent(r);
 }
 
 
