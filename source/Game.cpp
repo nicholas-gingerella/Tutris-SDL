@@ -143,41 +143,22 @@ void Game::render(SDL_Renderer *renderer)
     }
 }
 
-
-bool Game::isFilled()
-{
-    return false;
-}
-
-
-void Game::printField()
-{
-    int num_grid_elems = m_num_rows * m_num_cols;
-    for (int i = 0; i < num_grid_elems; ++i)
-    {
-        if ( (i > 0) && (i%m_num_cols == 0) )
-        {
-            
-        }
-    } 
-}
-
-
 bool Game::addPiece(ns_Tutris::tetromino_shape shape)
 {
+    // Only one piece can be active on the field
+    // at any time. Don't add a new piece if we
+    // still have an active piece on the field.
     if (m_piece_active)
     {
         return false;
     }
 
-    Piece piece;
 
-    // choose a random piece
+    // Set the shape of the new piece
+    Piece piece;
     if (shape == ns_Tutris::tetromino_shape::random)
     {
-        // get pseudo random number from 0 to num pieces
-        // random is the last enum entry, so it will be the
-        // upper bound
+        // Choose a random piece shape and color for the new piece
         unsigned int random_shape = rand() % ns_Tutris::tetromino_shape::random;
         unsigned int random_piece_color = rand() % ns_Tutris::piece_color::piece_random;
         piece.setShape(static_cast<ns_Tutris::tetromino_shape>(random_shape), static_cast<ns_Tutris::piece_color>(random_piece_color));
@@ -188,51 +169,33 @@ bool Game::addPiece(ns_Tutris::tetromino_shape shape)
         piece.setShape(shape);
     }
     
-    m_piece_shape.clear();
-    m_piece_shape = piece.getPiece();
+    // replace the currently active piece with the new one
+    m_active_piece.clear();
+    m_active_piece = piece.getPiece();
 
-    // place piece at top of grid
+    // place piece at the center top of the field
     m_piece_pos_x = (m_num_cols/2) - 1;
     m_piece_pos_y = 0;
-    int local_cols = 4;
     for (int i = 0; i < ns_Tutris::PIECE_DIMENSION; ++i)
     {
-        // Calculate grid position (index) to start drawing piece
-        // from top left to bottom right.
-        // change grid entry to '1' for solid blocks
-        // Draw order for default piece orientation:
-        // +-------------------+
-        // |  0 |  1 |  2 |  3 |
-        // +-------------------+
-        // |  4 |  5 |  6 |  7 |
-        // +-------------------+
-        // |  8 |  9 | 10 | 11 |
-        // +-------------------+
-        // | 12 | 13 | 14 | 15 |
-        // +-------------------+
-
-        // Index for x/y-coordinate in grid: x-pos + y-pos*num_grid_cols
-
         // Does adding the piece here cause a collision?
         // If so, game over
-        // // Can we move to the right?
         bool can_move = true;
 
         // check collision with piece shape
         for (int i = 0; i < ns_Tutris::PIECE_DIMENSION; i++)
         {
-            // Index for x/y-coordinate in grid: x-pos + y-pos*num_grid_cols
-            // only do collision checks on solid parts of the piece shape
             int curr_piece_index = i;
-            int grid_piece_x = m_piece_pos_x + (curr_piece_index % local_cols);
-            int grid_piece_y = m_piece_pos_y + (curr_piece_index/local_cols);
-            int target_grid_index = (grid_piece_x) + (grid_piece_y * m_num_cols);
+            int target_grid_index = pieceIndexToFieldIndex(m_piece_pos_x, m_piece_pos_y, curr_piece_index);
 
-            if (m_piece_shape[curr_piece_index].block_type == ns_Tutris::grid_cell_type::curr_piece)     
+            // only do collision checks on solid parts of the piece shape
+            if (m_active_piece[curr_piece_index].block_type == ns_Tutris::grid_cell_type::curr_piece)     
             {
                 if( (m_grid[target_grid_index].block_type != ns_Tutris::grid_cell_type::curr_piece) &&
                     (m_grid[target_grid_index].block_type != ns_Tutris::grid_cell_type::empty))
                 {
+                    // The target index is already occupied by a solid piece.
+                    // Not possible to move or place piece here
                     can_move = false;
                     break;
                 }
@@ -250,14 +213,12 @@ bool Game::addPiece(ns_Tutris::tetromino_shape shape)
             {
                 // Index for x/y-coordinate in grid: x-pos + y-pos*num_grid_cols
                 // only do collision checks on solid parts of the piece shape
-                int curr_piece_index = i;
-                int grid_piece_x = m_piece_pos_x + (curr_piece_index % local_cols);
-                int grid_piece_y = m_piece_pos_y + (curr_piece_index/local_cols);
-                int target_grid_index = grid_piece_x + (grid_piece_y * m_num_cols);
+               int curr_piece_index = i;
+               int target_grid_index = pieceIndexToFieldIndex(m_piece_pos_x, m_piece_pos_y, curr_piece_index);
 
-                if (m_piece_shape[curr_piece_index].block_type == ns_Tutris::grid_cell_type::curr_piece)     
+                if (m_active_piece[curr_piece_index].block_type == ns_Tutris::grid_cell_type::curr_piece)     
                 {
-                    m_grid[target_grid_index] = m_piece_shape[i];
+                    m_grid[target_grid_index] = m_active_piece[i];
                 }
             }
 
@@ -294,7 +255,7 @@ void Game::movePiece(ns_Tutris::move_direction dir)
                 int grid_piece_y = m_piece_pos_y + (curr_piece_index/piece_cols);
                 int target_grid_index = (grid_piece_x - 1) + (grid_piece_y * m_num_cols);
 
-                if (m_piece_shape[curr_piece_index].block_type == ns_Tutris::grid_cell_type::curr_piece)     
+                if (m_active_piece[curr_piece_index].block_type == ns_Tutris::grid_cell_type::curr_piece)     
                 {
                     if( (m_grid[target_grid_index].block_type != ns_Tutris::grid_cell_type::curr_piece) && 
                         (m_grid[target_grid_index].block_type != ns_Tutris::grid_cell_type::empty) )
@@ -311,7 +272,7 @@ void Game::movePiece(ns_Tutris::move_direction dir)
                 {
                     // Index for x/y-coordinate in grid: x-pos + y-pos*num_grid_cols
                     int grid_index = (m_piece_pos_x + (i%piece_cols)) + ((m_piece_pos_y + (i/piece_cols)) * m_num_cols);
-                    if (m_piece_shape[i].block_type == ns_Tutris::grid_cell_type::curr_piece)
+                    if (m_active_piece[i].block_type == ns_Tutris::grid_cell_type::curr_piece)
                     {
                         m_grid[grid_index] = ns_Tutris::BLOCK_EMPTY;
                     }
@@ -322,10 +283,10 @@ void Game::movePiece(ns_Tutris::move_direction dir)
                 for (int i = 0; i < ns_Tutris::PIECE_DIMENSION; ++i)
                 {
                     // Index for x/y-coordinate in grid: x-pos + y-pos*num_grid_cols
-                    if (m_piece_shape[i].block_type == ns_Tutris::grid_cell_type::curr_piece)
+                    if (m_active_piece[i].block_type == ns_Tutris::grid_cell_type::curr_piece)
                     {
                         int target_index = (m_piece_pos_x + (i%piece_cols)) + ((m_piece_pos_y + (i/piece_cols)) * m_num_cols);
-                        m_grid[target_index] = m_piece_shape[i];
+                        m_grid[target_index] = m_active_piece[i];
                     }
                 }
             }
@@ -350,7 +311,7 @@ void Game::movePiece(ns_Tutris::move_direction dir)
                 int grid_piece_y = m_piece_pos_y + (curr_piece_index/local_cols);
                 int target_grid_index = (grid_piece_x + 1) + (grid_piece_y * m_num_cols);
 
-                if (m_piece_shape[curr_piece_index].block_type == ns_Tutris::grid_cell_type::curr_piece)     
+                if (m_active_piece[curr_piece_index].block_type == ns_Tutris::grid_cell_type::curr_piece)     
                 {
                     if(m_grid[target_grid_index].block_type != ns_Tutris::grid_cell_type::curr_piece && m_grid[target_grid_index].block_type != ns_Tutris::grid_cell_type::empty)
                     {
@@ -367,7 +328,7 @@ void Game::movePiece(ns_Tutris::move_direction dir)
                     // Index for x/y-coordinate in grid: x-pos + y-pos*num_grid_cols
                     // only clear grid index if a solid part of the piece is currently occupying it
                     int grid_index = (m_piece_pos_x + (i%local_cols)) + ((m_piece_pos_y + (i/local_cols)) * m_num_cols);
-                    if (m_piece_shape[i].block_type == ns_Tutris::grid_cell_type::curr_piece)
+                    if (m_active_piece[i].block_type == ns_Tutris::grid_cell_type::curr_piece)
                     {
                       m_grid[grid_index] = ns_Tutris::BLOCK_EMPTY;
                     }
@@ -378,9 +339,9 @@ void Game::movePiece(ns_Tutris::move_direction dir)
                 {
                     // Index for x/y-coordinate in grid: x-pos + y-pos*num_grid_cols
                     int grid_index = (m_piece_pos_x + (i%local_cols)) + ((m_piece_pos_y + (i/local_cols)) * m_num_cols);
-                    if (m_piece_shape[i].block_type == ns_Tutris::grid_cell_type::curr_piece)
+                    if (m_active_piece[i].block_type == ns_Tutris::grid_cell_type::curr_piece)
                     {
-                        m_grid[grid_index] = m_piece_shape[i];
+                        m_grid[grid_index] = m_active_piece[i];
                     }
                 }
             }
@@ -404,7 +365,7 @@ void Game::movePiece(ns_Tutris::move_direction dir)
                 int grid_piece_y = m_piece_pos_y + (curr_piece_index/local_cols);
                 int target_grid_index = (grid_piece_x) + ((grid_piece_y + 1) * m_num_cols);
 
-                if (m_piece_shape[curr_piece_index].block_type == ns_Tutris::grid_cell_type::curr_piece)     
+                if (m_active_piece[curr_piece_index].block_type == ns_Tutris::grid_cell_type::curr_piece)     
                 {
                     if(m_grid[target_grid_index].block_type != ns_Tutris::grid_cell_type::curr_piece && m_grid[target_grid_index].block_type != ns_Tutris::grid_cell_type::empty)
                     {
@@ -421,7 +382,7 @@ void Game::movePiece(ns_Tutris::move_direction dir)
                 {
                     // clean up current position on grid
                     int grid_index = (m_piece_pos_x + (i%local_cols)) + ((m_piece_pos_y + (i/local_cols)) * m_num_cols);
-                    if (m_piece_shape[i].block_type == ns_Tutris::grid_cell_type::curr_piece)
+                    if (m_active_piece[i].block_type == ns_Tutris::grid_cell_type::curr_piece)
                     {
                         m_grid[grid_index] = ns_Tutris::BLOCK_EMPTY;
                     } 
@@ -431,9 +392,9 @@ void Game::movePiece(ns_Tutris::move_direction dir)
                 for (int i = 0; i < ns_Tutris::PIECE_DIMENSION; ++i)
                 {
                     // Index for x/y-coordinate in grid: x-pos + y-pos*num_grid_cols
-                    if (m_piece_shape[i].block_type == ns_Tutris::grid_cell_type::curr_piece)
+                    if (m_active_piece[i].block_type == ns_Tutris::grid_cell_type::curr_piece)
                     {
-                        m_grid[(m_piece_pos_x + (i%local_cols)) + ((new_y_pos + (i/local_cols)) * m_num_cols)] = m_piece_shape[i];
+                        m_grid[(m_piece_pos_x + (i%local_cols)) + ((new_y_pos + (i/local_cols)) * m_num_cols)] = m_active_piece[i];
                     }  
                 }
             }
@@ -446,7 +407,7 @@ void Game::movePiece(ns_Tutris::move_direction dir)
                 for (int i = 0; i < ns_Tutris::PIECE_DIMENSION; ++i)
                 {
                     // Index for x/y-coordinate in grid: x-pos + y-pos*num_grid_cols
-                    if (m_piece_shape[i].block_type == ns_Tutris::grid_cell_type::curr_piece)
+                    if (m_active_piece[i].block_type == ns_Tutris::grid_cell_type::curr_piece)
                     {
                         // set the grid spot to a locked piece rather than an active piece
                         m_grid[(m_piece_pos_x + (i%local_cols)) + ((m_piece_pos_y + (i/local_cols)) * m_num_cols)].block_type = ns_Tutris::grid_cell_type::piece;
@@ -474,7 +435,7 @@ void Game::rotatePiece()
         int x = i%piece_cols;
         int y = i/piece_cols;
         int target_index = 12-4*x+y; // rotate indexes CCW
-        rotated_piece[target_index] = m_piece_shape[i];
+        rotated_piece[target_index] = m_active_piece[i];
     }
 
     // Check if the rotated version of the piece collides
@@ -507,7 +468,7 @@ void Game::rotatePiece()
             // Index for x/y-coordinate in grid: x-pos + y-pos*num_grid_cols
             // only clear grid index if a solid part of the piece is currently occupying it
             int grid_index = (m_piece_pos_x + (i%piece_cols)) + ((m_piece_pos_y + (i/piece_cols)) * m_num_cols);
-            if (m_piece_shape[i].block_type == ns_Tutris::grid_cell_type::curr_piece)
+            if (m_active_piece[i].block_type == ns_Tutris::grid_cell_type::curr_piece)
             {
                 m_grid[grid_index] = ns_Tutris::BLOCK_EMPTY;
             }
@@ -516,7 +477,7 @@ void Game::rotatePiece()
         // update current piece shape to rotated version    
         for (int i = 0; i < ns_Tutris::PIECE_DIMENSION; ++i)
         {
-            m_piece_shape[i] = rotated_piece[i];
+            m_active_piece[i] = rotated_piece[i];
         }
 
         // populate grid positions
@@ -524,9 +485,9 @@ void Game::rotatePiece()
         {
             // Index for x/y-coordinate in grid: x-pos + y-pos*num_grid_cols
             int grid_index = (m_piece_pos_x + (i%piece_cols)) + ((m_piece_pos_y + (i/piece_cols)) * m_num_cols);
-            if (m_piece_shape[i].block_type == ns_Tutris::grid_cell_type::curr_piece)
+            if (m_active_piece[i].block_type == ns_Tutris::grid_cell_type::curr_piece)
             {
-                m_grid[grid_index] = m_piece_shape[i];
+                m_grid[grid_index] = m_active_piece[i];
             }
         }
     }
@@ -750,6 +711,21 @@ void Game::shiftBlocks(std::vector<int> rows)
             moveBlock(curr_block_index, ns_Tutris::move_direction::down, num_drops);
         }
     }    
+}
+
+unsigned int Game::pieceIndexToFieldIndex(int x_pos, int y_pos, int piece_index)
+{
+    // Each shape stored as a 4x4 grid: 4 rows and 4 columns.
+    // Needed to determine what row/col we are looking at for
+    // the piece shape.
+    int num_piece_shape_cols = 4;
+
+    // Index for x/y-coordinate in grid: x-pos + y-pos*num_grid_cols
+    int grid_piece_x = x_pos + (piece_index % num_piece_shape_cols);
+    int grid_piece_y = y_pos + (piece_index/num_piece_shape_cols);
+    int target_grid_index = (grid_piece_x) + (grid_piece_y * m_num_cols);
+
+    return target_grid_index;
 }
 
 
