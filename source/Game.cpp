@@ -112,9 +112,12 @@ void Game::render(SDL_Renderer *renderer)
         }
         else if (m_grid[i].block_type == ns_Tutris::grid_cell_type::empty)
         {
+            // Only start drawing empty field blocks after the first two
+            // rows of the field. Makes it easier to see when a piece
+            // crosses the top boundary when game over happens.
             if (i > m_num_cols*2)
             {
-                SDL_SetRenderDrawColor( renderer, 0x7D,0x7D,0x7D,0xFF);
+                SDL_SetRenderDrawColor( renderer, m_grid[i].color.r, m_grid[i].color.r, m_grid[i].color.r, 0xFF);
                 SDL_RenderFillRect(renderer, &field_square);
             }
         }
