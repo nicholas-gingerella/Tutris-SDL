@@ -569,20 +569,8 @@ bool Game::canMoveCurrPieceToPosition(int new_x_pos, int new_y_pos)
 
 bool Game::canRotateCurrPiece()
 {
-    // Each shape stored as a 4x4 grid: 4 rows and 4 columns.
-    // Needed to determine what row/col we are looking at for
-    // the piece shape.
-    int num_piece_shape_cols = 4;
-
-    // Create rotated copy of our piece
-    ns_Tutris::block rotated_piece [ns_Tutris::PIECE_DIMENSION];
-    for (int i = 0; i < ns_Tutris::PIECE_DIMENSION; i++)
-    {
-        int x = i % num_piece_shape_cols;
-        int y = i / num_piece_shape_cols;
-        int target_index = 12 - 4*x + y; // rotate indexes CCW
-        rotated_piece[target_index] = m_active_piece[i];
-    }
+    // Create rotated copy of our piece (MUST CLEANUP POINTER)
+    ns_Tutris::block* rotated_piece = getRotatedPieceCopy();
 
     // Check if the rotated version of the piece collides
     // with anything on the field
@@ -596,11 +584,13 @@ bool Game::canRotateCurrPiece()
             if(m_grid[target_grid_index].block_type != ns_Tutris::grid_cell_type::curr_piece &&
                 m_grid[target_grid_index].block_type != ns_Tutris::grid_cell_type::empty)
             {
+                delete rotated_piece;
                 return false;
             }
         }
     }
 
+    delete rotated_piece;
     return true;
 }
 
