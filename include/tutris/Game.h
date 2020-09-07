@@ -39,6 +39,14 @@ private:
     std::vector<ns_Tutris::block> m_active_piece;
     ns_Tutris::block* m_grid;
     unsigned int m_time_remaining_ms;
-    unsigned int pieceIndexToFieldIndex(int x_pos, int y_pos, int piece_index);
+    int pieceIndexToFieldIndex(int x_pos, int y_pos, int piece_index);
+    void clearCurrPiecePosition();
+    void moveCurrPieceToPosition(int x_pos, int y_pos);
+    bool canMoveCurrPieceToPosition(int new_x_pos, int new_y_pos);
+    void lockCurrPieceInPlace();
+    bool canRotateCurrPiece();
+    ns_Tutris::block* getRotatedPieceCopy();
+
+
 };
 #endif
