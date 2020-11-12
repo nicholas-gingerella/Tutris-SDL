@@ -30,3 +30,34 @@ Filling rows with blocks will clear the row and increase your score.
 * 2 or more consecutive rows: 1600 points per row cleared (Collapse clear)
   * Collapse: Any gaps or overhanging blocks are caved in and collapsed, leaving no gaps in the field.
   * The more rows you clear at once, the higher the score, but remember, the longer you go without clearing, the faster your active piece will fall.
+
+## How to Build
+### Install Libraries
+Install the necessary SDL libraries on your system (Currently only tested with Ubuntu OS)
+
+SDL2: Core SDL2 libraries
+* sudo apt install libsdl2-2.0-0
+* sudo apt install libsdl2-dev
+
+SDL2-Image: Extension for handling image files
+* sudo apt install libsdl2-image-2.0-0
+* sudo apt install libsdl2-image-dev
+
+SDL2-Mixer: Extension for handling sound files
+* sudo apt install libsdl2-mixer-2.0-0
+* sudo apt install libsdl2-mixer-dev
+
+SDL2-TTF: Extension for handling fonts
+* sudo apt install libsdl2-ttf-2.0-0
+* sudo apt install libsdl2-ttf-dev
+
+### Build Project
+To build, navigate to source folder in repo
+* cd repo_directory/source
+ 
+Run make to build project
+* make
+
+### Run Executable
+To run executable generated in bin directory of project
+* ../bin/Tutris
