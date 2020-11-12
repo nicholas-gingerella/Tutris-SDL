@@ -4,13 +4,13 @@ yet another Tetris implementation! This is a rework for the simple ncurses tetri
 ![First Tutris Screenshot](/../documentation/docs/screenshots/tutris_play_screenshot.png?raw=true "Tutris")
 
 ## Controls
-🠊 key: Move piece right
+right arrow key: Move piece right
 
-🠈 key: Move piece left
+left arrow key: Move piece left
 
-🠋 key: Move piece down
+down arrow key: Move piece down
 
-🠉 key: Rotate piece
+up arrow key: Rotate piece
 
 
 ## Gameplay
