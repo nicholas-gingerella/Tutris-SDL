@@ -2,11 +2,11 @@ CXX = g++
 CXXFLAGS = -ggdb -Wall -std=c++11 -I$(SDL_INCLUDE) -I$(INCLUDE_DIR)
 SDL_LIB = -L/usr/lib -lSDL2 -lSDL2_image -lSDL2_ttf -lSDL2_mixer -Wl,-rpath=/usr/lib
 LDFLAGS = $(SDL_LIB)
-SDL_INCLUDE = /usr/SDL_INCLUDE
+SDL_INCLUDE = /usr/include/SDL2
 INCLUDE_DIR = ../include
 UTILS_INCLUDE_DIR = $(INCLUDE_DIR)/my_utils
 TUTRIS_INCLUDES_DIR = $(INCLUDE_DIR)/tutris
-OBJ_DIR = obj
+OBJ_DIR = ./
 BIN_DIR = ../bin
 EXE = Tutris
 
