@@ -32,32 +32,37 @@ Filling rows with blocks will clear the row and increase your score.
   * The more rows you clear at once, the higher the score, but remember, the longer you go without clearing, the faster your active piece will fall.
 
 ## How to Build
+
+### Install C++ Compilation Tools
+* `sudo apt install g++`
+* `sudo apt install make`
+
 ### Install Libraries
 Install the necessary SDL libraries on your system (Currently only tested with Ubuntu OS)
 
 SDL2: Core SDL2 libraries
-* sudo apt install libsdl2-2.0-0
-* sudo apt install libsdl2-dev
+* `sudo apt install libsdl2-2.0-0`
+* `sudo apt install libsdl2-dev`
 
 SDL2-Image: Extension for handling image files
-* sudo apt install libsdl2-image-2.0-0
-* sudo apt install libsdl2-image-dev
+* `sudo apt install libsdl2-image-2.0-0`
+* `sudo apt install libsdl2-image-dev`
 
 SDL2-Mixer: Extension for handling sound files
-* sudo apt install libsdl2-mixer-2.0-0
-* sudo apt install libsdl2-mixer-dev
+* `sudo apt install libsdl2-mixer-2.0-0`
+* `sudo apt install libsdl2-mixer-dev`
 
 SDL2-TTF: Extension for handling fonts
-* sudo apt install libsdl2-ttf-2.0-0
-* sudo apt install libsdl2-ttf-dev
+* `sudo apt install libsdl2-ttf-2.0-0`
+* `sudo apt install libsdl2-ttf-dev`
 
 ### Build Project
 To build, navigate to source folder in repo
-* cd repo_directory/source
+* `cd repo_directory/source`
  
 Run make to build project
-* make
+* `make`
 
 ### Run Executable
 To run executable generated in bin directory of project
-* ../bin/Tutris
+* `../bin/Tutris`
