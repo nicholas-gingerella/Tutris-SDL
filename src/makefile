@@ -16,6 +16,8 @@ OBJ_DIR = ./
 BIN_DIR = ../bin
 EXE = Tutris
 
+all: $(EXE)
+
 _OBJS = main.o Game.o Piece.o 
 OBJS = $(patsubst %,$(OBJ_DIR)/%,$(_OBJS))
 
