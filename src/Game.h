@@ -2,7 +2,7 @@
 #define FIELD_H
 #include <algorithm>
 #include <vector>
-#include "tutris.h"
+#include "Tutris.h"
 class Game
 {
 public:

@@ -1,7 +1,7 @@
 #ifndef TETROMINO_H
 #define TETROMINO_H
 #include <vector>
-#include "tutris.h"
+#include "Tutris.h"
 #include <SDL2/SDL.h>
 
 

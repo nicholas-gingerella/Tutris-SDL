@@ -19,7 +19,7 @@
 #include "SDL_Utils.h"
 #include "Game.h"
 #include "Piece.h"
-#include "tutris.h"
+#include "Tutris.h"
 
 void display_game_over_prompt(SDL_Renderer *);
 

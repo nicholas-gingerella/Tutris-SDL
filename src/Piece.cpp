@@ -1,5 +1,5 @@
 #include "Piece.h"
-#include "tutris.h"
+#include "Tutris.h"
 #include <iostream>
 #include <algorithm>
 #include <iterator>
